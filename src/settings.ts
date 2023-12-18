@@ -115,7 +115,7 @@ app.post('/videos', (req:RequestWithBody<CreateVideoType>,res: Response) => {
         id: +(new Date()),
         title,
         author,
-        canBeDownloaded: true,
+        canBeDownloaded: false,
         minAgeRestriction: null,
         createdAt: createdAt.toISOString(),
         publicationDate: publicationDate.toISOString(),
@@ -179,7 +179,7 @@ app.put('/videos/:id', (req: RequestWithParamsAndBody<{id: string},InputModel>, 
         errors_put.errorsMessages.push({message: 'Invalid minAgeRestriction field!', field: 'minAgeRestriction'})
     }
     if ( minAgeRestriction && typeof minAgeRestriction != null) {
-        if (typeof minAgeRestriction !== 'number' || minAgeRestriction > 100 || minAgeRestriction < 0) {
+        if (typeof minAgeRestriction !== 'number' || minAgeRestriction >= 18 || minAgeRestriction <= 1) {
             errors_put.errorsMessages.push({message: 'Invalid minAgeRestriction field!', field: 'minAgeRestriction'})
         }
     }
