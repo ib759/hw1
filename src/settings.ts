@@ -1,0 +1,213 @@
+import express, {Request, Response} from 'express'
+export const app = express()
+
+app.use(express.json())
+
+const AvailableResolutions = ["P144", "P240", "P360", "P480", "P720", "P1080", "P1440", "P2160" ]
+
+type VideoDbType = {
+    id: number,
+    title: string,
+    author: string,
+    canBeDownloaded: boolean,
+    minAgeRestriction: number | null,
+    createdAt: string,
+    publicationDate: string,
+    availableResolutions: typeof AvailableResolutions
+}
+
+const videos: VideoDbType[] = [
+    {
+        id: 0,
+        title: "string",
+        author: "string",
+        canBeDownloaded: true,
+        minAgeRestriction: null,
+        createdAt: "2023-12-08T13:55:39.148Z",
+        publicationDate: "2023-12-08T13:55:39.148Z",
+        availableResolutions: [
+            "P144"
+        ]
+    }
+]
+
+type RequestWithParams<P> = Request<P, {}, {}, {}>
+type RequestWithBody<B> = Request<{}, {}, B, {}>
+type RequestWithParamsAndBody<P, B> = Request<P, {}, B, {}>
+
+type CreateVideoType = {
+    title: string,
+    author: string,
+    availableResolutions: typeof AvailableResolutions
+}
+
+type InputModel = {
+    title: string,
+    author: string,
+    availableResolutions: typeof AvailableResolutions,
+    canBeDownloaded: boolean,
+    minAgeRestriction: number | null,
+    publicationDate: string
+}
+
+type ErrorMessage = {
+    message: string
+    field: string
+}
+
+type ErrorType = {
+    errorsMessages: ErrorMessage[]
+}
+
+app.get('/videos', (req: Request, res: Response) => {
+    /*res.send(videos)*/
+    res.status(200).send(videos)
+})
+
+app.get('/videos/:id', (req: RequestWithParams<{id: string}>, res: Response) => {
+    const id = +req.params.id
+
+    const video = videos.find((v)=> v.id === id)
+
+    if (!video){
+        res.sendStatus(404)
+        return
+    }
+
+    /*res.send(video)*/
+    res.status(200).send(video)
+})
+
+app.post('/videos', (req:RequestWithBody<CreateVideoType>,res: Response) => {
+    let errors: ErrorType = {
+        errorsMessages: []
+    }
+
+    let {title, author, availableResolutions} = req.body
+
+    if (!title || typeof title !== 'string' || !title.trim() || title.trim().length > 40){
+        errors.errorsMessages.push({message: 'Invalid title!', field: 'title'})
+    }
+
+    if (!author || typeof author !== 'string' || !author.trim() || author.trim().length > 20){
+        errors.errorsMessages.push({message: 'Invalid author!', field: 'author'})
+    }
+
+    if (availableResolutions && Array.isArray(availableResolutions)){
+        availableResolutions.forEach((r) => {
+            !AvailableResolutions.includes(r) && errors.errorsMessages.push({message: 'Invalid availableResolutions', field: 'availableResolutions'})
+        })
+    }else {
+        availableResolutions = []
+    }
+
+    if (errors.errorsMessages.length){
+        res.status(400).send(errors)
+        return
+    }
+
+    const createdAt = new Date()
+    const publicationDate = new Date()
+
+    publicationDate.setDate(createdAt.getDate()+1)
+
+    const newVideo: VideoDbType = {
+        id: +(new Date()),
+        title,
+        author,
+        canBeDownloaded: true,
+        minAgeRestriction: null,
+        createdAt: createdAt.toISOString(),
+        publicationDate: publicationDate.toISOString(),
+        availableResolutions
+    }
+
+    videos.push(newVideo)
+
+    res.status(201).send(newVideo)
+})
+
+app.delete('/videos/:id', (req: RequestWithParams<{id: string}>, res: Response) => {
+    for (let i=0; i < videos.length; i++) {
+        if (videos[i].id === +req.params.id) {
+            videos.splice(i,1);
+           /* res.send(204);*/
+            res.sendStatus(204);
+            return;
+        }
+    }
+
+    res.sendStatus(404);
+})
+
+app.delete('/testing/all-data', (req: Request, res: Response) => {
+
+    videos.length = 0;
+
+    res.sendStatus(204);
+})
+
+app.put('/videos/:id', (req: RequestWithParamsAndBody<{id: string},InputModel>, res: Response) => {
+
+    /*let errors_put: ErrorType*/
+    let errors_put: ErrorType = {
+        errorsMessages: []
+    }
+
+    let {title, author, availableResolutions, canBeDownloaded, minAgeRestriction, publicationDate} = req.body
+
+    if (!title || typeof title !== 'string' || !title.trim() || title.trim().length > 40){
+        errors_put.errorsMessages.push({message: 'Invalid title!', field: 'title'})
+    }
+
+    if (!author || typeof author !== 'string' || !author.trim() || author.trim().length > 20){
+        errors_put.errorsMessages.push({message: 'Invalid author!', field: 'author'})
+    }
+    if (availableResolutions && Array.isArray(availableResolutions)){
+        availableResolutions.forEach((r) => {
+            !AvailableResolutions.includes(r) && errors_put.errorsMessages.push({message: 'Invalid availableResolutions', field: 'availableResolutions'})
+        })
+    }else {
+        availableResolutions = []
+    }
+
+    if (!canBeDownloaded || typeof canBeDownloaded !== 'boolean'){
+        errors_put.errorsMessages.push({message: 'Invalid canBeDownloaded field!', field: 'canBeDownloaded'})
+    }
+
+    if(!minAgeRestriction){
+        errors_put.errorsMessages.push({message: 'Invalid minAgeRestriction field!', field: 'minAgeRestriction'})
+    }
+    if ( minAgeRestriction && typeof minAgeRestriction != null) {
+        if (typeof minAgeRestriction !== 'number' || minAgeRestriction > 100 || minAgeRestriction < 0) {
+            errors_put.errorsMessages.push({message: 'Invalid minAgeRestriction field!', field: 'minAgeRestriction'})
+        }
+    }
+
+    if (!publicationDate || typeof publicationDate !== 'string' || !publicationDate.trim() || publicationDate.trim().length > 40){
+        errors_put.errorsMessages.push({message: 'Invalid publicationDate!', field: 'publicationDate'})
+    }
+
+    if (errors_put.errorsMessages.length){
+        res.status(400).send(errors_put)
+        return
+    }
+    /*--------------------------------------------------------*/
+    const id = +req.params.id
+
+    const video = videos.find((v)=> v.id === id)
+
+    if (!video){
+        res.sendStatus(404)
+        return
+    }
+
+    video.title = req.body.title
+    video.author = req.body.author
+    video.availableResolutions = req.body.availableResolutions
+    video.canBeDownloaded = req.body.canBeDownloaded
+    video.minAgeRestriction = req.body.minAgeRestriction
+    video.publicationDate = req.body.publicationDate
+
+    res.sendStatus(204)
+})
