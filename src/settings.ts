@@ -1,20 +1,15 @@
 import express, {Request, Response} from 'express'
+import {VideoDbType} from "./types/common";
+import {blogRoute} from "./routes/blog_route";
+import {postRoute} from "./routes/post_route";
+import {testingRoute} from "./routes/testing-route";
+
 export const app = express()
 
 app.use(express.json())
-
-const AvailableResolutions = ["P144", "P240", "P360", "P480", "P720", "P1080", "P1440", "P2160" ]
-
-type VideoDbType = {
-    id: number,
-    title: string,
-    author: string,
-    canBeDownloaded: boolean,
-    minAgeRestriction: number | null,
-    createdAt: string,
-    publicationDate: string,
-    availableResolutions: typeof AvailableResolutions
-}
+app.use('/blogs', blogRoute)
+app.use('/posts', postRoute)
+app.use('/testing',testingRoute)
 
 const videos: VideoDbType[] = [
     {
@@ -31,36 +26,7 @@ const videos: VideoDbType[] = [
     }
 ]
 
-type RequestWithParams<P> = Request<P, {}, {}, {}>
-type RequestWithBody<B> = Request<{}, {}, B, {}>
-type RequestWithParamsAndBody<P, B> = Request<P, {}, B, {}>
-
-type CreateVideoType = {
-    title: string,
-    author: string,
-    availableResolutions: typeof AvailableResolutions
-}
-
-type InputModel = {
-    title: string,
-    author: string,
-    availableResolutions: typeof AvailableResolutions,
-    canBeDownloaded: boolean,
-    minAgeRestriction: number | null,
-    publicationDate: string
-}
-
-type ErrorMessage = {
-    message: string
-    field: string
-}
-
-type ErrorType = {
-    errorsMessages: ErrorMessage[]
-}
-
-app.get('/videos', (req: Request, res: Response) => {
-    /*res.send(videos)*/
+/*app.get('/videos', (req: Request, res: Response) => {
     res.status(200).send(videos)
 })
 
@@ -74,7 +40,6 @@ app.get('/videos/:id', (req: RequestWithParams<{id: string}>, res: Response) => 
         return
     }
 
-    /*res.send(video)*/
     res.status(200).send(video)
 })
 
@@ -131,7 +96,6 @@ app.delete('/videos/:id', (req: RequestWithParams<{id: string}>, res: Response) 
     for (let i=0; i < videos.length; i++) {
         if (videos[i].id === +req.params.id) {
             videos.splice(i,1);
-           /* res.send(204);*/
             res.sendStatus(204);
             return;
         }
@@ -149,7 +113,7 @@ app.delete('/testing/all-data', (req: Request, res: Response) => {
 
 app.put('/videos/:id', (req: RequestWithParamsAndBody<{id: string},InputModel>, res: Response) => {
 
-    /*let errors_put: ErrorType*/
+    //let errors_put: ErrorType
     let errors_put: ErrorType = {
         errorsMessages: []
     }
@@ -192,7 +156,7 @@ app.put('/videos/:id', (req: RequestWithParamsAndBody<{id: string},InputModel>, 
         res.status(400).send(errors_put)
         return
     }
-    /*--------------------------------------------------------*/
+
     const id = +req.params.id
 
     const video = videos.find((v)=> v.id === id)
@@ -211,3 +175,5 @@ app.put('/videos/:id', (req: RequestWithParamsAndBody<{id: string},InputModel>, 
 
     res.sendStatus(204)
 })
+
+ */
