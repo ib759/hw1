@@ -9,7 +9,7 @@ export const db: DBType = {
     posts: []
 }
 
-const mongoURI = process.env.MONGO_URL || 'mongodb://0.0.0.0:27017' || ' '
+const mongoURI = process.env.MONGO_URL || 'mongodb://0.0.0.0:27017' || 'mongodb://localhost:27017'
 
 console.log(process.env.MONGO_URL)
 
