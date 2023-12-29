@@ -12,11 +12,14 @@ export class BlogRepository {
 
     static createBlog(name:string, description:string, websiteUrl:string){
         let newId = +(new Date())
+        const createdAt = new Date()
         const newBlog: BlogModel = {
             id: newId.toString(),
             name,
             description,
-            websiteUrl
+            websiteUrl,
+            createdAt: createdAt.toISOString(),
+            isMembership: false
         }
 
         db.blogs.push(newBlog)

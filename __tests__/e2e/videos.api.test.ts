@@ -1,16 +1,37 @@
 import request from 'supertest'
 import {app} from "../../src/settings";
-import {BlogRepository} from "../../src/repositories/blog_repository";
-import {createdBlogForPost} from "./blogs.api.test";
+import {BlogRepository} from "../../src/repositories/blog_db_repository";
 
-//const BlogForCreatePostId = createdBlogForPost.id
-const CheckPost = BlogRepository.createBlog("string", "string", "https://17Un.q9.4KmRBjmOcz5H1MEvs3RGbhxwo4F0Ihyl73PYkDlusur0dBNC4pxWticoziE_n7i69ddyIIS.uKHtVusStFMh")
-const BlogForCreatePostId = CheckPost.id
+let createdData = {
+    id: "123",
+    name: "string",
+    description: "string",
+    websiteUrl: "https://17Un.q9.4KmRBjmOcz5H1MEvs3RGbhxwo4F0Ihyl73PYkDlusur0dBNC4pxWticoziE_n7i69ddyIIS.uKHtVusStFMh",
+    createdAt: "string",
+    isMembership: false
+}
 
-const CheckPut = BlogRepository.createBlog("string", "string", "https://10Un.q9.4KmRBjmOcz5H1MEvs3RGbhxwo4F0Ihyl73PYkDlusur0dBNC4pxWticoziE_n7i69ddyIIS.uKHtVusStHHm")
-const BlogForUpdatePostId = CheckPut.id
+let updatedData = {
+    id: "345",
+    name: "string",
+    description: "string",
+    websiteUrl: "https://10Un.q9.4KmRBjmOcz5H1MEvs3RGbhxwo4F0Ihyl73PYkDlusur0dBNC4pxWticoziE_n7i69ddyIIS.uKHtVusStHHm",
+    createdAt: "string",
+    isMembership: false
+}
+const BlogForCreatePostId =createdData.id
+const BlogForUpdatePostId = updatedData.id
+
+/*const CheckPost = await BlogRepository.createBlog(createdData)
+const BlogForCreatePostId =CheckPost.id
+
+const CheckPut = await BlogRepository.createBlog(updatedData)
+const BlogForUpdatePostId = CheckPut.id*/
 
 describe('/posts',  () => {
+    beforeAll(async () => {
+        await request(app).delete('/testing/all-data')
+    })
 
     it('test get /posts return 200 and empty array', async () => {
         await request(app)
@@ -50,6 +71,7 @@ describe('/posts',  () => {
     })
 
     let createdPost: any = null
+
     it('test post: should create new post with correct input data', async () => {
         const createResponsePost = await request(app)
             .post('/posts')
@@ -67,7 +89,8 @@ describe('/posts',  () => {
             shortDescription: 'string',
             content: 'string',
             blogId: BlogForCreatePostId,
-            blogName: expect.any(String)
+            blogName: expect.any(String),
+            createdAt: expect.any(String)
         })
 
         await request(app)
@@ -93,7 +116,8 @@ describe('/posts',  () => {
             shortDescription: 'string',
             content: 'string',
             blogId: BlogForCreatePostId,
-            blogName: expect.any(String)
+            blogName: expect.any(String),
+            createdAt: expect.any(String)
         })
 
         await request(app)

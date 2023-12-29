@@ -60,7 +60,9 @@ describe('/blogs',  () => {
             id: expect.any(String),
             name: 'string',
             description: 'string',
-            websiteUrl: 'https://v.HSyPCmSrkhMt7nBA-pLKkXZXgdZijaoBfXNMgCwpcn9lWLzru_CZ3UpQODVPQoEL7gzbV3xURrgFE4.vr6F1Q7_Y3o'
+            websiteUrl: 'https://v.HSyPCmSrkhMt7nBA-pLKkXZXgdZijaoBfXNMgCwpcn9lWLzru_CZ3UpQODVPQoEL7gzbV3xURrgFE4.vr6F1Q7_Y3o',
+            createdAt: expect.any(String),
+            isMembership: false
         })
 
         await request(app)
@@ -84,7 +86,9 @@ describe('/blogs',  () => {
             id: expect.any(String),
             name: 'string',
             description: 'string',
-            websiteUrl: 'https://v.HSyPCmSrkhMt7nBA-pLKkXZXgdZijaoBfXNMgCwpcn9lWLzru_CZ3UpQODVPQoEL7gzbV3xURrgFE4.vr6F1Q7_Y3o'
+            websiteUrl: 'https://v.HSyPCmSrkhMt7nBA-pLKkXZXgdZijaoBfXNMgCwpcn9lWLzru_CZ3UpQODVPQoEL7gzbV3xURrgFE4.vr6F1Q7_Y3o',
+            createdAt: expect.any(String),
+            isMembership: false
         })
 
         await request(app)

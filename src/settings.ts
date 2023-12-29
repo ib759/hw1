@@ -11,7 +11,9 @@ app.use('/blogs', blogRoute)
 app.use('/posts', postRoute)
 app.use('/testing',testingRoute)
 
-const videos: VideoDbType[] = [
+// ------not used from first homework----------------
+
+/*const videos: VideoDbType[] = [
     {
         id: 0,
         title: "string",
@@ -26,7 +28,7 @@ const videos: VideoDbType[] = [
     }
 ]
 
-/*app.get('/videos', (req: Request, res: Response) => {
+app.get('/videos', (req: Request, res: Response) => {
     res.status(200).send(videos)
 })
 

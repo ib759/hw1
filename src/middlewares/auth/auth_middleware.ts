@@ -2,7 +2,6 @@ import {NextFunction, Request, Response} from "express";
 
 import dotenv from 'dotenv'
 dotenv.config()
-//configDotenv()
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     /*if(req.headers['authorization'] !== 'Basic YWRtaW46cXdlcnR5'){

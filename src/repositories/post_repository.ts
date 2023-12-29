@@ -12,13 +12,15 @@ export class PostRepository {
 
     static createPost(title:string, shortDescription:string, content:string, blogId:string){
         let newId = +(new Date())
+        const createdAt = new Date()
         const newPost: PostModel = {
             id: newId.toString(),
             title,
             shortDescription,
             content,
             blogId,
-            blogName: new Date().toString()
+            blogName: new Date().toString(),
+            createdAt: createdAt.toISOString()
         }
 
         db.posts.push(newPost)
