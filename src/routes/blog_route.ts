@@ -51,6 +51,12 @@ blogRoute.get('/:id', async (req: RequestWithParams<{id: string}>, res:Response)
 blogRoute.get('/:id/posts', async (req: RequestWithParamsAndQuery<{id: string}, QueryPostByBlogIdInputModel>, res:Response) => {
 
     const id = req.params.id
+    const checkBlogId = await BlogRepository.getBlogById(id)
+
+    if (!checkBlogId) {
+        res.sendStatus(404) //blog with this id doesnt exist
+        return
+    }
 
     const sortData = {
         pageNumber: req.query.pageNumber,
