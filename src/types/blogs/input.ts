@@ -9,3 +9,9 @@ export type UpdateBlogModel = {
     description: string
     websiteUrl: string
 }
+
+export type CreatePostByBlog = {
+    title: string,
+    shortDescription: string,
+    content: string
+}

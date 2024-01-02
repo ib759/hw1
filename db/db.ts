@@ -10,7 +10,7 @@ export const db: DBType = {
 }
 
 const mongoURI = process.env.MONGO_URL || 'mongodb://0.0.0.0:27017' || 'mongodb://localhost:27017'
-
+//MONGO_URL = mongodb+srv://ib759:Pass321@cluster0.lzytye2.mongodb.net/blogs-hws?retryWrites=true&w=majority
 console.log(process.env.MONGO_URL)
 
 const client = new MongoClient(mongoURI)
@@ -29,4 +29,4 @@ export const runDb = async () => {
        await client.close()
     }
 }
-//qqxdl4bQAAWQow7G password Pass321
+//password Pass321
