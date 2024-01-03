@@ -30,6 +30,7 @@ blogRoute.get('/', async (req: RequestWithQuery<QueryBlogInputModel>, res:Respon
     res.status(200).send(blogs)
 })
 
+
 blogRoute.get('/:id', async (req: RequestWithParams<{id: string}>, res:Response) => {
 
     const id = req.params.id
@@ -51,6 +52,11 @@ blogRoute.get('/:id', async (req: RequestWithParams<{id: string}>, res:Response)
 blogRoute.get('/:id/posts', async (req: RequestWithParamsAndQuery<{id: string}, QueryPostByBlogIdInputModel>, res:Response) => {
 
     const id = req.params.id
+    if (!ObjectId.isValid(id)){
+        res.sendStatus(404)
+        return
+    }
+
     const checkBlogId = await BlogRepository.getBlogById(id)
 
     if (!checkBlogId) {
@@ -65,10 +71,7 @@ blogRoute.get('/:id/posts', async (req: RequestWithParamsAndQuery<{id: string}, 
         sortDirection: req.query.sortDirection,
     }
 
-    if (!ObjectId.isValid(id)){
-        res.sendStatus(404)
-        return
-    }
+
     const posts = await BlogRepository.getPostsByBlogId(id, sortData)
 
     res.status(200).send(posts)

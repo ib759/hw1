@@ -6,7 +6,6 @@ import {CreatePostModel, UpdatePostModel} from "../types/posts/input";
 import {PostDbType} from "../types/db/db";
 import {QueryPostInputModel} from "../types/posts/query.post.input.models";
 import {QueryPostOutputModel} from "../types/posts/query.post.output.models";
-import {blogMapper} from "../types/blogs/mappers/blog-mapper";
 
 export class PostRepository {
 
@@ -14,7 +13,7 @@ export class PostRepository {
         //const posts = await postCollection.find({}).toArray()
 
         const sortBy = sortData.sortBy ?? 'createdAt'
-        const sortDirection = 'desc' ?? sortData.sortDirection //if 'desc' ?? sortData.sortDirection, then .sort(sortBy, sortDirection -highlighted RED)
+        const sortDirection = sortData.sortDirection ?? 'desc' //if 'desc' ?? sortData.sortDirection, then .sort(sortBy, sortDirection -highlighted RED)
         const pageNumber = sortData.pageNumber ?? 1
         const pageSize = sortData.pageSize ?? 10
 

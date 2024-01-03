@@ -11,7 +11,13 @@ describe('/blogs',  () => {
     it('test get /blogs return 200 and empty array', async () => {
         await request(app)
             .get('/blogs')
-            .expect(200, [])
+            .expect(200, {
+                pagesCount: 0,
+                page: 1,
+                pageSize: 10,
+                totalCount: 0,
+                items: []
+            })
     })
 
     it('test get /blogs/:id : return 404 if blog does not exist', async () => {
@@ -29,7 +35,13 @@ describe('/blogs',  () => {
 
         await request(app)
             .get('/blogs')
-            .expect(200, [])
+            .expect(200, {
+                pagesCount: 0,
+                page: 1,
+                pageSize: 10,
+                totalCount: 0,
+                items: []
+            })
     })
 
     it(' test post chain middlewares: firstly check authorization, should not create blog with incorrect login or password', async () => {
@@ -41,7 +53,13 @@ describe('/blogs',  () => {
 
         await request(app)
             .get('/blogs')
-            .expect(200, [])
+            .expect(200, {
+                pagesCount: 0,
+                page: 1,
+                pageSize: 10,
+                totalCount: 0,
+                items: []
+            })
     })
 
 
@@ -67,7 +85,14 @@ describe('/blogs',  () => {
 
         await request(app)
             .get('/blogs')
-            .expect(200, [createdBlogForPost])
+            .expect(200, {
+                pagesCount: 1,
+                page: 1,
+                pageSize: 10,
+                totalCount: 1,
+                items: [createdBlogForPost]
+            }
+            )
     })
 
     let createdBlogForDelete: any = null
@@ -91,9 +116,17 @@ describe('/blogs',  () => {
             isMembership: false
         })
 
+
+
         await request(app)
             .get('/blogs')
-            .expect(200, [createdBlogForPost, createdBlogForDelete])
+            .expect(200, {
+                pagesCount: 1,
+                page: 1,
+                pageSize: 10,
+                totalCount: 2,
+                items: [createdBlogForDelete, createdBlogForPost]
+            })
     })
 
     it('test put: should not update blog with incorrect input data', async () => {
@@ -132,10 +165,10 @@ describe('/blogs',  () => {
         await request(app)
             .get('/blogs/' + createdBlogForPost.id)
             .expect(200, {
-                ...createdBlogForPost,
-                name: 'string',
-                description: 'string',
-                websiteUrl: 'https://v.HSyPCmSrkhMt7nBA-pLKkXZXgdZijaoBfXNMgCwpcn9lWLzru_CZ3UpQODVPQoEL7gzbV3xURrgFE4.vr6F1Q7_Y3o'
+                            ...createdBlogForPost,
+                            name: 'string',
+                            description: 'string',
+                            websiteUrl: 'https://v.HSyPCmSrkhMt7nBA-pLKkXZXgdZijaoBfXNMgCwpcn9lWLzru_CZ3UpQODVPQoEL7gzbV3xURrgFE4.vr6F1Q7_Y3o'
             })
     })
 

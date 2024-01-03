@@ -11,8 +11,8 @@ import {QueryBlogOutputModel, QueryPostByBlogIdOutputModel} from "../types/blogs
 export class BlogRepository {
     static async getAllBlogs(sortData: QueryBlogInputModel) :Promise<QueryBlogOutputModel> { //:Promise<BlogModel[]>
         const searchNameTerm = sortData.searchNameTerm ?? null
-        const sortBy = sortData.sortBy ?? 'createdAt'
-        const sortDirection = 'desc' ?? sortData.sortDirection //if 'desc' ?? sortData.sortDirection, then .sort(sortBy, sortDirection -highlighted RED)
+        const sortBy =  sortData.sortBy ?? 'createdAt'
+        const sortDirection = sortData.sortDirection ?? 'desc' //if 'desc' ?? sortData.sortDirection, then .sort(sortBy, sortDirection -highlighted RED)
         const pageNumber = sortData.pageNumber ?? 1
         const pageSize = sortData.pageSize ?? 10
 
@@ -31,6 +31,11 @@ export class BlogRepository {
             .limit(pageSize)
             .toArray()
 
+        /*for(let i=0; i < blogs.length; i++){
+            blogMapper(blogs[i])
+        }*/
+
+        const blogsEdit = blogs.map(blogMapper)
         const totalCount = await blogCollection.countDocuments(filter)
         const pagesCount = Math.ceil(totalCount/pageSize)
         return {
@@ -38,14 +43,15 @@ export class BlogRepository {
             page: pageNumber,
             pageSize,
             totalCount,
-            items: blogs.map(blogMapper)
+            //items: blogs.map(blogMapper)
+            items: blogsEdit
         }
 
     }
 
     static async getPostsByBlogId(blogId:string, sortData: QueryPostByBlogIdInputModel): Promise<QueryPostByBlogIdOutputModel> { //:Promise<BlogModel[]>
         const sortBy = sortData.sortBy ?? 'createdAt'
-        const sortDirection = 'desc' ?? sortData.sortDirection //if 'desc' ?? sortData.sortDirection, then .sort(sortBy, sortDirection -highlighted RED)
+        const sortDirection = sortData.sortDirection ?? 'desc' //if 'desc' ?? sortData.sortDirection, then .sort(sortBy, sortDirection -highlighted RED)
         const pageNumber = sortData.pageNumber ?? 1
         const pageSize = sortData.pageSize ?? 10
 
