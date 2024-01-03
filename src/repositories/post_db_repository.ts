@@ -16,7 +16,7 @@ export class PostRepository {
         const sortDirection = sortData.sortDirection ?? 'desc' //if 'desc' ?? sortData.sortDirection, then .sort(sortBy, sortDirection -highlighted RED)
         const pageNumber = sortData.pageNumber ?? 1
         const pageSize = sortData.pageSize ?? 10
-debugger
+//debugger
         const posts = await postCollection
             .find({})
             .sort(sortBy, sortDirection)
@@ -46,9 +46,14 @@ debugger
 
     static async createPost(createdPost: CreatePostModel): Promise<PostModel>{
         const createdAt = new Date()
+
+        const blog = await blogCollection.findOne({_id: new ObjectId(createdPost.blogId)})
+        if(!blog){
+            return
+        }
         const newPost: PostDbType = {
             ...createdPost,
-            blogName: "string",
+            blogName: blog.name,
             createdAt: createdAt.toISOString()
         }
 

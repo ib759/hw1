@@ -44,11 +44,15 @@ postRoute.get('/:id', async (req: RequestWithParams<{id: string}>, res:Response)
 postRoute.post('/', authMiddleware, postValidation(), async (req: RequestWithBody<CreatePostModel>, res:Response) => {
     let {title, shortDescription, content, blogId} = req.body
     const newPost = await PostRepository.createPost({title, shortDescription, content, blogId})
-
+    if (!newPost) {
+        res.sendStatus(404)
+        return
+    }
     const checkInsertion = await PostRepository.getPostById(newPost.id)
 
     if (!checkInsertion) {
         res.sendStatus(400)
+        return
     }
     res.status(201).send(checkInsertion)
 })
