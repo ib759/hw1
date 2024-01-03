@@ -16,7 +16,7 @@ export class PostRepository {
         const sortDirection = sortData.sortDirection ?? 'desc' //if 'desc' ?? sortData.sortDirection, then .sort(sortBy, sortDirection -highlighted RED)
         const pageNumber = sortData.pageNumber ?? 1
         const pageSize = sortData.pageSize ?? 10
-
+debugger
         const posts = await postCollection
             .find({})
             .sort(sortBy, sortDirection)
@@ -28,8 +28,8 @@ export class PostRepository {
         const pagesCount = Math.ceil(totalCount/pageSize)
         return {
             pagesCount,
-            page: pageNumber,
-            pageSize,
+            page: +pageNumber,
+            pageSize: +pageSize,
             totalCount,
             items: posts.map(postMapper)
         }
