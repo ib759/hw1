@@ -28,7 +28,7 @@ export class BlogRepository {
             .find(filter)
             .sort(sortBy, sortDirection)
             .skip((pageNumber-1)*pageSize)
-            .limit(pageSize)
+            .limit(+pageSize)
             .toArray()
 
         /*for(let i=0; i < blogs.length; i++){
@@ -59,7 +59,7 @@ export class BlogRepository {
             .find({blogId: blogId})
             .sort(sortBy, sortDirection)
             .skip((pageNumber-1)*pageSize)
-            .limit(pageSize)
+            .limit(+pageSize)
             .toArray()
 
         const totalCount = await postCollection.countDocuments({blogId: blogId})

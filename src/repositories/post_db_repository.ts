@@ -21,7 +21,7 @@ export class PostRepository {
             .find({})
             .sort(sortBy, sortDirection)
             .skip((pageNumber-1)*pageSize)
-            .limit(pageSize)
+            .limit(+pageSize)
             .toArray()
 
         const totalCount = await postCollection.countDocuments()
