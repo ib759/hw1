@@ -44,7 +44,7 @@ export class PostRepository {
         return postMapper(post)
     }
 
-    static async createPost(createdPost: CreatePostModel): Promise<PostModel>{
+    static async createPost(createdPost: CreatePostModel): Promise<PostModel|undefined>{
         const createdAt = new Date()
 
         const blog = await blogCollection.findOne({_id: new ObjectId(createdPost.blogId)})

@@ -3,7 +3,7 @@ import {NextFunction, Request, Response} from "express";
 import dotenv from 'dotenv'
 dotenv.config()
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = (req: Request<any, any, any, any>, res: Response, next: NextFunction) => {
     /*if(req.headers['authorization'] !== 'Basic YWRtaW46cXdlcnR5'){
         res.sendStatus(401)
         return

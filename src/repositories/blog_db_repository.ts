@@ -31,10 +31,6 @@ export class BlogRepository {
             .limit(+pageSize)
             .toArray()
 
-        /*for(let i=0; i < blogs.length; i++){
-            blogMapper(blogs[i])
-        }*/
-
         const blogsEdit = blogs.map(blogMapper)
         const totalCount = await blogCollection.countDocuments(filter)
         const pagesCount = Math.ceil(totalCount/pageSize)

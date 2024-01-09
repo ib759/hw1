@@ -94,13 +94,15 @@ describe('/posts',  () => {
 
     /*
     it('test post: should create new post with correct input data', async () => {
+        const blog = createBlog()
+
         const createResponsePost = await request(app)
             .post('/posts')
             .set('authorization', 'Basic YWRtaW46cXdlcnR5')
             .send({title: 'string',
                 shortDescription: 'string',
                 content: 'string',
-                blogId: BlogForCreatePostId})
+                blogId: BlogForCreatePostId //blog.id})
             .expect(201)
         createdPost = createResponsePost.body;
 
@@ -110,7 +112,7 @@ describe('/posts',  () => {
             shortDescription: 'string',
             content: 'string',
             blogId: BlogForCreatePostId,
-            blogName: expect.any(String),
+            blogName: expect.any(String)// blog.name,
             createdAt: expect.any(String)
         })
 
