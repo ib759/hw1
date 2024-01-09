@@ -60,6 +60,7 @@ export class UserRepository {
             .limit(+pageSize)
             .toArray()
 
+        //const total = users.length
         const totalCount = await userCollection.countDocuments()
         const pagesCount = Math.ceil(totalCount/pageSize)
         return {
