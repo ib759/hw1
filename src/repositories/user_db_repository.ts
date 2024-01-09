@@ -21,6 +21,7 @@ export class UserRepository {
         let filter = {}
         let filterLogin = {}
         let filterEmail = {}
+        let LengthFlag = false
 
         if(searchLoginTerm){
             filterLogin = {
@@ -35,6 +36,7 @@ export class UserRepository {
         }else {filterEmail = {email: null}}
 
         if(searchLoginTerm || searchEmailTerm) {
+            LengthFlag = true
             filter = {
                 $or: [
                     filterLogin,
@@ -61,7 +63,12 @@ export class UserRepository {
             .toArray()
 
         //const total = users.length
-        const totalCount = await userCollection.countDocuments()
+        let totalCount = await userCollection.countDocuments()
+
+        if(LengthFlag){      //if there is filter
+            totalCount = users.length
+        }
+
         const pagesCount = Math.ceil(totalCount/pageSize)
         return {
             pagesCount,
