@@ -1,4 +1,4 @@
-import {BlogDbType, DBType, PostDbType, UserDbType} from "../src/types/db/db";
+import {BlogDbType, CommentDbType, DBType, PostDbType, UserDbType} from "../src/types/db/db";
 import dotenv from 'dotenv'
 dotenv.config()
 import {MongoClient} from "mongodb"
@@ -7,7 +7,8 @@ const port = process.env.PORT || 3000
 export const db: DBType = {
     blogs: [],
     posts: [],
-    users: []
+    users: [],
+    comments: []
 }
 
 const mongoURI = process.env.MONGO_URL || 'mongodb://0.0.0.0:27017' || 'mongodb://localhost:27017'
@@ -20,6 +21,7 @@ export const database = client.db('blogs-hws')
 export const blogCollection = database.collection<BlogDbType>('blogs')
 export const postCollection = database.collection<PostDbType>('posts')
 export const userCollection = database.collection<UserDbType>('users')
+export const commentCollection = database.collection<CommentDbType>('comments')
 
 export const runDb = async () => {
     try{

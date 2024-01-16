@@ -1,5 +1,5 @@
 import {userCollection} from "../../db/db";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {UserDbType} from "../types/db/db";
 import {QueryUserInputModel} from "../types/users/query.user.input.model";
 import {QueryUserOutputModel} from "../types/users/query.user.output.model";
@@ -64,6 +64,7 @@ export class UserRepository {
 
         //const total = users.length
         let totalCount = await userCollection.countDocuments()
+        //let totalCount = await userCollection.countDocuments(filter)
 
         if(LengthFlag){      //if there is filter
             totalCount = users.length
@@ -87,8 +88,8 @@ export class UserRepository {
         return userMapper(user)
     }
 
-    static async getUserByLogin(login:string): Promise<UserDbType | null>{
-        const user  = await userCollection.findOne({login: login})
+    static async getUserByLoginOrEmail(loginOrEmail:string): Promise<WithId<UserDbType> | null>{
+        const user  = await userCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
         if(!user){
             return null
         }

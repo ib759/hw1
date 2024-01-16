@@ -4,3 +4,8 @@ export type UserModel = {
     email: string,
     createdAt: string
 }
+export type CurrentUserOutput = {
+    email: string,
+    login: string,
+    userId: string
+}

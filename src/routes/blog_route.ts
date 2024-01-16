@@ -7,7 +7,7 @@ import {
     RequestWithParamsAndQuery,
     RequestWithQuery
 } from "../types/common";
-import {authMiddleware} from "../middlewares/auth/auth_middleware";
+import {authMiddleware} from "../middlewares/authorization/auth_middleware";
 import {blogValidation} from "../validators/blog-validator";
 import {CreateBlogModel, CreatePostByBlog, UpdateBlogModel} from "../types/blogs/input";
 import {ObjectId} from "mongodb";

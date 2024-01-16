@@ -1,11 +1,13 @@
 import {BlogModel} from "../blogs/output";
 import {PostModel} from "../posts/output";
 import {UserModel} from "../users/output.users.model";
+import {CommentModel} from "../comments/output.comments.model";
 
 export type DBType = {
     blogs: BlogModel[],
     posts: PostModel[],
-    users: UserModel[]
+    users: UserModel[],
+    comments: CommentModel[]
 }
 
 export type BlogDbType = {
@@ -30,4 +32,14 @@ export type UserDbType = {
     password: string,
     email: string,
     createdAt: string
+}
+
+export type CommentDbType = {
+    content: string,
+    commentatorInfo: {
+        userId: string,
+        userLogin: string
+    },
+    createdAt: string,
+    postId: string // dont mentioned in Swagger
 }

@@ -1,7 +1,7 @@
 import {Router, Request, Response} from "express";
 import {RequestWithBody, RequestWithParams, RequestWithQuery} from "../types/common";
 import {CreateUserModel} from "../types/users/input.users.model";
-import {authMiddleware} from "../middlewares/auth/auth_middleware";
+import {authMiddleware} from "../middlewares/authorization/auth_middleware";
 import {QueryUserInputModel} from "../types/users/query.user.input.model";
 import {UserRepository} from "../repositories/user_db_repository";
 import {ObjectId} from "mongodb";

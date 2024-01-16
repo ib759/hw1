@@ -5,6 +5,7 @@ import {postRoute} from "./routes/post_route";
 import {testingRoute} from "./routes/testing-route";
 import {authRoute} from "./routes/auth-route";
 import {userRoute} from "./routes/user-route";
+import {commentRoute} from "./routes/comment-route";
 
 export const app = express()
 
@@ -15,6 +16,9 @@ app.use('/posts', postRoute)
 app.use('/testing',testingRoute)
 app.use('/users',userRoute)
 app.use('/auth',authRoute)
+app.use('/comments',commentRoute)
+
+export const JWT_SECRET = process.env.JWT_SECRET || "123"
 
 // ------not used from first homework----------------
 
