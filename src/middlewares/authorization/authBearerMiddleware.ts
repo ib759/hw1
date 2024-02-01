@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from "express";
 import {jwtService} from "../../applications/jwt-service";
-import {usersService} from "../../services/user-service";
+import {UserQueryRepository} from "../../query-repositories/user_query_repository";
 
 export const authBearerMiddleware = async (req:Request, res:Response, next: NextFunction) =>{
     if(!req.headers.authorization){
@@ -12,7 +12,7 @@ export const authBearerMiddleware = async (req:Request, res:Response, next: Next
     const userId = await jwtService.getUserIdByToken(token)
 
     if(userId){
-        req.user  = await usersService.findUserById(userId.toString())
+        req.user  = await UserQueryRepository.getUserById(userId.toString())
         return next()
     }
     res.sendStatus(401)

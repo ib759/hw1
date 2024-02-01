@@ -1,10 +1,35 @@
 import {Request} from "express";
+import {UserModel} from "./users/output.users.model";
 
 export type RequestWithParams<P> = Request<P, {}, {}, {}>
 export type RequestWithBody<B> = Request<{}, {}, B, {}>
 export type RequestWithQuery<Q> = Request<{}, {}, {}, Q>
 export type RequestWithParamsAndBody<P, B> = Request<P, {}, B, {}>
 export type RequestWithParamsAndQuery<P, Q> = Request<P, {}, {}, Q>
+
+
+export type ErrorMessage = {
+    message: string
+    field: string
+}
+
+export type ErrorType = {
+    errorsMessages: ErrorMessage[]
+}
+
+export type outputData = {
+    status: number
+    data: UserModel|ErrorType|string|object
+}
+
+
+
+
+
+
+
+
+
 
 
 //not used types from first homework
@@ -35,11 +60,4 @@ export type InputModel = {
     publicationDate: string
 }
 
-export type ErrorMessage = {
-    message: string
-    field: string
-}
 
-export type ErrorType = {
-    errorsMessages: ErrorMessage[]
-}

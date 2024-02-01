@@ -39,7 +39,6 @@ export class BlogRepository {
             page: +pageNumber,
             pageSize: +pageSize,
             totalCount,
-            //items: blogs.map(blogMapper)
             items: blogsEdit
         }
 

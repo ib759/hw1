@@ -6,7 +6,7 @@ import {
     RequestWithParamsAndQuery,
     RequestWithQuery
 } from "../types/common";
-import {authMiddleware} from "../middlewares/authorization/auth_middleware";
+import {authMiddleware} from "../middlewares/authorization/authBasicMiddleware";
 import {CreatePostModel, UpdatePostModel} from "../types/posts/input";
 import {PostRepository} from "../repositories/post_db_repository";
 import {postValidation} from "../validators/post-validator";

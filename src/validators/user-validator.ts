@@ -9,3 +9,4 @@ export const emailValidator = body('email').isString().trim()
     .matches('^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$').withMessage('Incorrect email!')
 
 export const userValidation = () => [loginValidator, passwordValidator, emailValidator, inputValidation]
+

@@ -1,31 +1,35 @@
-
 import jwt from 'jsonwebtoken'
-import {ObjectId, WithId} from "mongodb";
 import {JWT_SECRET} from "../settings";
-import {UserModel} from "../types/users/output.users.model";
+import {UserQueryRepository} from "../query-repositories/user_query_repository";
+
+
+export const jwtMapper = (token: string) =>{
+        return{
+            accessToken: token
+        }
+    }
 
 export const jwtService = {
 
-    async createJWT (user: UserModel){
+    async createJWT (loginOrEmail:string): Promise<object|null>{
+        const user = await UserQueryRepository.getUserWithPassword(loginOrEmail)
 
-        const token = jwt.sign({userId: user.id}, JWT_SECRET, {expiresIn:'1h'})
-        return token
+        if (!user){
+            return null
+        }
+        const token = jwt.sign({userId: user._id}, JWT_SECRET, {expiresIn:'1h'})
+        const jwtToken = jwtMapper(token)
+        return  jwtToken
     },
 
-    async getUserIdByToken(token: string){
+    async getUserIdByToken(token: string): Promise<object|null>{
 
         try {
-            const result = jwt.verify(token, JWT_SECRET)
-            return new ObjectId(result.userId)
+            const result:any  = jwt.verify(token, JWT_SECRET)
+            return result.userId//new ObjectId(result.userId)
         }catch (error) {
             return null
         }
     }
 
-}
-
-export const jwtMapper = (token: string) =>{
-    return{
-        accessToken: token
-    }
 }

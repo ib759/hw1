@@ -1,108 +1,12 @@
 import {userCollection} from "../../db/db";
 import {ObjectId, WithId} from "mongodb";
 import {UserDbType} from "../types/db/db";
-import {QueryUserInputModel} from "../types/users/query.user.input.model";
-import {QueryUserOutputModel} from "../types/users/query.user.output.model";
-import {CreateUserModel} from "../types/users/input.users.model";
 import {UserModel} from "../types/users/output.users.model";
-import {userMapper} from "../types/users/mappers/user-mapper";
 
 export class UserRepository {
 
-    static async getAllUsers(sortData: QueryUserInputModel): Promise<QueryUserOutputModel>{
+    static async addUser(newUser: UserDbType): Promise<UserModel|undefined>{
 
-        const sortBy = sortData.sortBy ?? 'createdAt'
-        const sortDirection = sortData.sortDirection ?? 'desc'
-        const pageNumber = sortData.pageNumber ?? 1
-        const pageSize = sortData.pageSize ?? 10
-        const searchLoginTerm =  sortData.searchLoginTerm ?? null
-        const searchEmailTerm = sortData.searchEmailTerm ?? null
-
-        let filter = {}
-        let filterLogin = {}
-        let filterEmail = {}
-        let LengthFlag = false
-
-        if(searchLoginTerm){
-            filterLogin = {
-                login: {$regex: searchLoginTerm, $options:'i'}
-            }
-        }else {filterLogin = {login: null}}
-
-        if(searchEmailTerm){
-            filterEmail = {
-                email: {$regex: searchEmailTerm, $options:'i'}
-            }
-        }else {filterEmail = {email: null}}
-
-        if(searchLoginTerm || searchEmailTerm) {
-            LengthFlag = true
-            filter = {
-                $or: [
-                    filterLogin,
-                    filterEmail
-                ]
-            }
-        }
-
-        /*if(searchLoginTerm || searchEmailTerm){
-            filter = {
-                $or: [
-                    //{login: null},
-                    {login: {$regex: searchLoginTerm, $options: 'i'}},
-                    {email: {$regex: searchEmailTerm, $options: 'i'}},
-                        ]
-                    }
-        }*/
-
-        const users = await userCollection
-            .find(filter)
-            .sort(sortBy, sortDirection)
-            .skip((pageNumber-1)*pageSize)
-            .limit(+pageSize)
-            .toArray()
-
-        //const total = users.length
-        let totalCount = await userCollection.countDocuments()
-        //let totalCount = await userCollection.countDocuments(filter)
-
-        if(LengthFlag){      //if there is filter
-            totalCount = users.length
-        }
-
-        const pagesCount = Math.ceil(totalCount/pageSize)
-        return {
-            pagesCount,
-            page: +pageNumber,
-            pageSize: +pageSize,
-            totalCount,
-            items: users.map(userMapper)
-        }
-    }
-
-    static async getUserById(id:string): Promise<UserModel | null>{
-        const user = await userCollection.findOne({_id: new ObjectId(id)})
-        if(!user){
-            return null
-        }
-        return userMapper(user)
-    }
-
-    static async getUserByLoginOrEmail(loginOrEmail:string): Promise<WithId<UserDbType> | null>{
-        const user  = await userCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
-        if(!user){
-            return null
-        }
-        return user
-    }
-
-    static async createUser(createdUser: CreateUserModel): Promise<UserModel|undefined>{
-        const createdAt = new Date()
-
-        const newUser: UserDbType = {
-            ...createdUser,
-            createdAt: createdAt.toISOString(),
-        }
         const user = await userCollection.insertOne(newUser)
 
         return {
@@ -111,8 +15,20 @@ export class UserRepository {
         }
     }
 
-    static async deleteUserById(id:string): Promise<boolean>{
-        const post = await userCollection.deleteOne({_id: new ObjectId(id)})
-        return !!post.deletedCount;
+    static async deleteUserById(id:string): Promise<boolean> {
+        const user = await userCollection.deleteOne({_id: new ObjectId(id)})
+        return !!user.deletedCount;
+    }
+
+    static async deleteUserByEmail(email:string): Promise<boolean> {
+        const user = await userCollection.deleteOne({email: email})
+        return !!user.deletedCount;
+    }
+
+    static async updateUserConfirmation(id: string): Promise<boolean>{
+        const user = await userCollection.updateOne({_id: new ObjectId(id)},
+            {$set: {'emailConfirmation.isConfirmed': true}})
+
+        return !!user.matchedCount
     }
 }
