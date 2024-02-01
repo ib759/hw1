@@ -70,7 +70,7 @@ export const authService = {
         const user = await UserQueryRepository.getUserByConfirmationCode(code)
 
         if(!user) {
-            errors.errorsMessages.push({message: 'User is not found!', field: 'user'})
+            errors.errorsMessages.push({message: 'User is not found!', field: 'code'})
             return {
                 status:1,
                 data:errors
