@@ -38,16 +38,19 @@ export const emailManager = {
             }
         }
 
-        const emailConfirmation = await UserQueryRepository.getConfirmationInfo(email)
+        const updatedInfo = await authService.updatedConfirmationCode(email)
+        let confirmationCode: string = ''
 
-        if (!emailConfirmation) {
+        if(updatedInfo.status !== 204){
             return {
                 status: 400,
-                data: ' '
+                data: result.data
             }
         }
 
-        const isSentEmail = await emailAdapter.sendEmail(email, emailConfirmation.confirmationCode)
+        if(typeof updatedInfo.data === 'string') confirmationCode = updatedInfo.data
+debugger
+        const isSentEmail = await emailAdapter.sendEmail(email, confirmationCode)
 
         if (isSentEmail.status === 1){
                     return {

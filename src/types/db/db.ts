@@ -27,16 +27,22 @@ export type PostDbType = {
     createdAt: string
 }
 
+export type ConfirmationInfoDBType = {
+        confirmationCode: string
+        expirationDate: string
+        isConfirmed: boolean
+}
+
 export type UserDbType = {
     login: string,
     password: string,
     email: string,
     createdAt: string
     emailConfirmation: {
-        confirmationCode: string
-        expirationDate: string
-        isConfirmed: boolean
-    }
+                confirmationCode: string
+                expirationDate: string
+                isConfirmed: boolean
+                    }
 }
 
 export type CommentDbType = {

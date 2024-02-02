@@ -6,6 +6,9 @@ import {CreateUserModel} from "../types/users/input.users.model";
 import {emailManager} from "../managers/email-manager";
 import {usersService} from "./user-service";
 import {userMapper} from "../types/users/mappers/user-mapper";
+import {v4 as uuidv4} from "uuid";
+import {addHours} from "date-fns";
+import {ConfirmationInfoDBType} from "../types/db/db";
 
 export const authService = {
     async userRegistration(user:CreateUserModel):Promise<outputData>{
@@ -76,7 +79,7 @@ export const authService = {
                 data:errors
             }}
         if(user.emailConfirmation.isConfirmed) {
-            errors.errorsMessages.push({message: 'User is already confirmed!', field: 'user'})
+            errors.errorsMessages.push({message: 'User is already confirmed!', field: 'code'})
             return {
                 status:1,
                 data:errors
@@ -99,7 +102,7 @@ export const authService = {
             await UserRepository.updateUserConfirmation(user._id.toString())
         }
         catch (error: any) {
-            errors.errorsMessages.push({message: error, field: 'user'})
+            errors.errorsMessages.push({message: error, field: 'code'})
             return{
                 status:1,
                 data:errors
@@ -120,7 +123,7 @@ export const authService = {
         const user = await UserQueryRepository.getUserWithPassword(email)
 
         if(!user) {
-            errors.errorsMessages.push({message: 'User is not found!', field: 'user'})
+            errors.errorsMessages.push({message: 'User is not found!', field: 'email'})
             return {
                 status: 400,
                 data: errors
@@ -128,7 +131,7 @@ export const authService = {
         }
 
         if (user.emailConfirmation.isConfirmed) {
-            errors.errorsMessages.push({message: 'User is already confirmed!', field: 'user'})
+            errors.errorsMessages.push({message: 'User is already confirmed!', field: 'email'})
             return {
                 status: 400,
                 data: errors
@@ -139,5 +142,42 @@ export const authService = {
             status: 204,
             data: userMapper(user)
         }
+    },
+    async updatedConfirmationCode(email: string):Promise<outputData> {
+        let errors: ErrorType = {
+            errorsMessages: []
+        }
+
+        const user = await UserQueryRepository.getUserWithPassword(email)
+
+        if(!user) {
+            errors.errorsMessages.push({message: 'User is not found!', field: 'email'})
+            return {
+                status: 400,
+                data: errors
+            }
+        }
+
+        const info: ConfirmationInfoDBType = {
+            confirmationCode: uuidv4(),
+            expirationDate: addHours(new Date(), 5).toISOString(),
+            isConfirmed: false
+        }
+
+        const isUpdated = await UserRepository.updateConfirmationInfo(user._id.toString(), info)
+
+        if(!isUpdated) {
+            errors.errorsMessages.push({message: 'Code is not updated!', field: 'email'})
+            return {
+                status: 400,
+                data: errors
+            }
+        }
+
+        return {
+            status: 204,
+            data: info.confirmationCode
+        }
+
     }
 }

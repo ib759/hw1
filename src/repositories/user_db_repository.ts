@@ -1,6 +1,6 @@
 import {userCollection} from "../../db/db";
 import {ObjectId, WithId} from "mongodb";
-import {UserDbType} from "../types/db/db";
+import {ConfirmationInfoDBType, UserDbType} from "../types/db/db";
 import {UserModel} from "../types/users/output.users.model";
 
 export class UserRepository {
@@ -29,6 +29,14 @@ export class UserRepository {
         const user = await userCollection.updateOne({_id: new ObjectId(id)},
             {$set: {'emailConfirmation.isConfirmed': true}})
 
+        return !!user.matchedCount
+    }
+
+    static async updateConfirmationInfo(id:string, emailConfirmation: ConfirmationInfoDBType): Promise<boolean>{
+        const user = await userCollection.updateOne({_id: new ObjectId(id)},
+            {$set: { 'emailConfirmation.confirmationCode': emailConfirmation.confirmationCode,
+                            'emailConfirmation.expirationDate': emailConfirmation.expirationDate,
+                            'emailConfirmation.isConfirmed': emailConfirmation.isConfirmed }})
         return !!user.matchedCount
     }
 }
