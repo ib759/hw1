@@ -1,5 +1,4 @@
 import express, {Request, Response} from 'express'
-import {VideoDbType} from "./types/common";
 import {blogRoute} from "./routes/blog-route";
 import {postRoute} from "./routes/post-route";
 import {testingRoute} from "./routes/testing-route";

@@ -60,9 +60,10 @@ authRoute.post('/registration', userValidation(), async (req: RequestWithBody<Cr
         case 204:
             res.sendStatus(204)
             break;
+        default:
+            res.sendStatus(400)
+            break;
     }
-
-    res.sendStatus(400)
 })
 
 authRoute.post('/registration-confirmation', confirmationCodeValidation(), async (req: RequestWithBody<InputConfirmationModel>, res: Response) =>{
@@ -77,6 +78,9 @@ authRoute.post('/registration-confirmation', confirmationCodeValidation(), async
             break;
         case 2:
             res.sendStatus(204)
+            break;
+        default:
+            res.sendStatus(400)
             break;
     }
 })
@@ -94,8 +98,10 @@ authRoute.post('/registration-email-resending', emailResendingValidation(), asyn
         case 204:
             res.sendStatus(204)
             break;
+        default:
+            res.sendStatus(400)
+            break;
     }
-    res.sendStatus(400)
 })
 
 
