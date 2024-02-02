@@ -102,6 +102,22 @@ export class UserQueryRepository {
         return userMapper(user)
     }
 
+    static async getUserByLogin(login: string): Promise<UserModel| null>{
+        const user  = await userCollection.findOne({login: login})
+        if(!user){
+            return null
+        }
+        return userMapper(user)
+    }
+
+    static async getUserByEmail(email: string): Promise<UserModel| null>{
+        const user  = await userCollection.findOne({email: email})
+        if(!user){
+            return null
+        }
+        return userMapper(user)
+    }
+
     static async getConfirmationInfo(email: string):Promise<{confirmationCode: string, expirationDate: string, isConfirmed: boolean}|null>{
         const info = await userCollection.findOne({email: email})
         if(!info){
