@@ -59,7 +59,7 @@ export const authService = {
 
         const user = await UserQueryRepository.getUserByLoginOrEmail(login, email)
         if (user){
-            errors.errorsMessages.push({message: 'User with this email already exists!', field: 'email'})
+            errors.errorsMessages.push({message: 'User with this login already exists!', field: 'login'})
             return errors
         }
         return null
