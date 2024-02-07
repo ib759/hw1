@@ -7,7 +7,8 @@ export type DBType = {
     blogs: BlogModel[],
     posts: PostModel[],
     users: UserModel[],
-    comments: CommentModel[]
+    comments: CommentModel[],
+    tokens: tokenDBType[]
 }
 
 export type BlogDbType = {
@@ -53,4 +54,9 @@ export type CommentDbType = {
     },
     createdAt: string,
     postId: string // dont mentioned in Swagger
+}
+
+export type tokenDBType = {
+    refreshToken: string
+    userId: string
 }

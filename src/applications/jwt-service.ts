@@ -1,35 +1,54 @@
 import jwt from 'jsonwebtoken'
-import {JWT_SECRET} from "../settings";
-import {UserQueryRepository} from "../query-repositories/user_query_repository";
+import {ACCESS_LIFETIME, JWT_SECRET, REFRESH_LIFETIME, REFRESH_SECRET} from "../settings";
+import {accessTokenModel, tokensModel} from "../types/users/auth.login.models";
 
 
-export const jwtMapper = (token: string) =>{
-        return{
+export const jwtMapper = (token: string): accessTokenModel=>{
+        return {
             accessToken: token
         }
     }
 
 export const jwtService = {
 
-    async createJWT (loginOrEmail:string): Promise<object|null>{
-        const user = await UserQueryRepository.getUserWithPassword(loginOrEmail)
-
-        if (!user){
+    async createJWT (id: string, secret: string, lifetime: string): Promise<string|null>{
+        try{
+            const token = jwt.sign({userId: id}, secret, {expiresIn:lifetime})
+            return  token
+        }catch (e) {
             return null
         }
-        const token = jwt.sign({userId: user._id}, JWT_SECRET, {expiresIn:'1h'})
-        const jwtToken = jwtMapper(token)
-        return  jwtToken
     },
 
-    async getUserIdByToken(token: string): Promise<object|null>{
-
+    async verifyTokenGetUserId(token: string, secret: string): Promise<string|null>{
         try {
-            const result:any  = jwt.verify(token, JWT_SECRET)
-            return result.userId//new ObjectId(result.userId)
+            const result:any  = jwt.verify(token, secret)
+            return result.userId
         }catch (error) {
             return null
         }
-    }
+    },
 
+    async createAccessAndRefreshTokens(id: string):Promise<tokensModel|null>{
+        const accessToken = await this.createJWT(id, JWT_SECRET, ACCESS_LIFETIME)
+        const refreshToken = await this.createJWT(id, REFRESH_SECRET, REFRESH_LIFETIME)
+
+        if(accessToken && refreshToken){
+            const jwtToken = jwtMapper(accessToken)
+            return  {
+                accessToken: jwtToken,
+                refreshToken: refreshToken
+            }
+        } else return null
+    },
+
+    async revokeToken(token:string, id: string, secret: string):Promise<boolean>{
+        try{
+            jwt.sign({userId: id}, secret, {expiresIn:0})
+            return  true
+        }catch (e) {
+            return false
+        }
+
+    }
 }

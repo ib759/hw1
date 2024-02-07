@@ -1,12 +1,11 @@
 import {Router, Request, Response} from "express";
 import {RequestWithBody} from "../types/common";
-import {authLoginInputModel} from "../types/users/auth.login.input.model";
+import {authLoginModels} from "../types/users/auth.login.models";
 import {
     confirmationCodeValidation,
     emailResendingValidation,
     userInfoForLoginValidation
 } from "../validators/auth-user-validator";
-import {jwtService} from "../applications/jwt-service";
 import {usersService} from "../services/user-service";
 import {authBearerMiddleware} from "../middlewares/authorization/authBearerMiddleware";
 import {CreateUserModel} from "../types/users/input.users.model";
@@ -14,19 +13,21 @@ import {userValidation} from "../validators/user-validator";
 import {EmailResendingModel, InputConfirmationModel} from "../types/users/email.confirmation.models";
 import {authService} from "../services/auth-service";
 import {emailManager} from "../managers/email-manager";
+import {REFRESH_SECRET} from "../settings";
 
 
 export const authRoute = Router({})
 
-authRoute.post('/login', userInfoForLoginValidation(), async (req: RequestWithBody<authLoginInputModel>, res: Response) => {
+authRoute.post('/login', userInfoForLoginValidation(), async (req: RequestWithBody<authLoginModels>, res: Response) => {
     let {loginOrEmail, password} = req.body
 
     const valid= await usersService.checkCredentials(loginOrEmail, password)//false if login or email or password wrong or user not exists
 
     if(valid){
-        const jwtToken = await jwtService.createJWT(loginOrEmail)
-        if(jwtToken){
-            res.status(200).send(jwtToken)
+        const tokens = await authService.userLogin(loginOrEmail)
+        if(tokens){
+            res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, secure: true })
+            res.status(200).send(tokens.accessToken)
             return
         }
     }
@@ -102,6 +103,40 @@ authRoute.post('/registration-email-resending', emailResendingValidation(), asyn
             res.sendStatus(400)
             break;
     }
+
+})
+
+authRoute.post('/refresh-token', async(req: Request, res: Response) =>{
+    if (!req.cookies['refreshToken']) {
+           res.sendStatus(401)
+    }
+
+    const refreshToken = req.cookies['refreshToken']
+    const tokens  = await authService.updateAccessAndRefreshTokens(refreshToken, REFRESH_SECRET)
+
+    if(tokens){
+        res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, secure: true })
+        res.status(200).send(tokens.accessToken)
+        return
+    }
+
+    res.sendStatus(401)
+})
+
+authRoute.post('/logout', async(req: Request, res: Response) =>{
+    if (!req.cookies['refreshToken']) {
+        res.sendStatus(401)
+    }
+
+    const refreshToken = req.cookies['refreshToken']
+
+    const isRevoked = await authService.userLogout(refreshToken)
+
+    if(isRevoked){
+        res.sendStatus(204)
+        return
+    }
+    res.sendStatus(401)
 })
 
 

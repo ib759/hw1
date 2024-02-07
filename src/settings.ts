@@ -1,4 +1,5 @@
 import express, {Request, Response} from 'express'
+import cookieParser from "cookie-parser";
 import {blogRoute} from "./routes/blog-route";
 import {postRoute} from "./routes/post-route";
 import {testingRoute} from "./routes/testing-route";
@@ -9,6 +10,7 @@ import {commentRoute} from "./routes/comment-route";
 export const app = express()
 
 app.use(express.json())
+app.use(cookieParser())
 
 app.use('/blogs', blogRoute)
 app.use('/posts', postRoute)
@@ -18,6 +20,18 @@ app.use('/auth',authRoute)
 app.use('/comments',commentRoute)
 
 export const JWT_SECRET = process.env.JWT_SECRET || "123"
+export const REFRESH_SECRET = "123"
+export const ACCESS_LIFETIME = '1h'
+export const REFRESH_LIFETIME = '2h'
+
+
+
+
+
+
+
+
+
 
 // ------not used from first homework----------------
 

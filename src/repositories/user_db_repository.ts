@@ -2,11 +2,57 @@ import {userCollection} from "../../db/db";
 import {ObjectId, WithId} from "mongodb";
 import {ConfirmationInfoDBType, UserDbType} from "../types/db/db";
 import {UserModel} from "../types/users/output.users.model";
+import {userMapper} from "../types/users/mappers/user-mapper";
 
 export class UserRepository {
 
-    static async addUser(newUser: UserDbType): Promise<UserModel|undefined>{
+    static async getUserById(id:string): Promise<UserModel | null>{
+        const user = await userCollection.findOne({_id: new ObjectId(id)})
+        if(!user){
+            return null
+        }
+        return userMapper(user)
+    }
 
+    static async getConfirmationInfo(email: string):Promise<{confirmationCode: string, expirationDate: string, isConfirmed: boolean}|null>{
+        const info = await userCollection.findOne({email: email})
+        if(!info){
+            return null
+        }
+        return info.emailConfirmation
+    }
+
+    static async getUserByConfirmationCode(code:string):Promise<WithId<UserDbType>|null>{
+        const user = await userCollection.findOne({"emailConfirmation.confirmationCode": code})//{emailConfirmation: {confirmationCode: code}}
+        if(!user) return null
+        return user
+    }
+
+    static async getUserWithPassword(loginOrEmail:string): Promise<WithId<UserDbType>| null>{
+        const user  = await userCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
+        if(!user){
+            return null
+        }
+        return user
+    }
+
+    static async getUserByLogin(login: string): Promise<UserModel| null>{
+        const user  = await userCollection.findOne({login: login})
+        if(!user){
+            return null
+        }
+        return userMapper(user)
+    }
+
+    static async getUserByEmail(email: string): Promise<UserModel| null>{
+        const user  = await userCollection.findOne({email: email})
+        if(!user){
+            return null
+        }
+        return userMapper(user)
+    }
+
+    static async addUser(newUser: UserDbType): Promise<UserModel|undefined>{
         const user = await userCollection.insertOne(newUser)
 
         return {

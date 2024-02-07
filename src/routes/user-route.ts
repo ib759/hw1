@@ -38,6 +38,9 @@ userRoute.post('/', authMiddleware, userValidation(), async (req: RequestWithBod
         case 204:
             res.status(201).send(newUser.data)
             break;
+        default:
+            res.sendStatus(400)
+            break;
     }
 })
 

@@ -3,8 +3,6 @@ import {QueryUserOutputModel} from "../types/users/query.user.output.model";
 import {userCollection} from "../../db/db";
 import {userMapper} from "../types/users/mappers/user-mapper";
 import {UserModel} from "../types/users/output.users.model";
-import {ObjectId, WithId} from "mongodb";
-import {UserDbType} from "../types/db/db";
 
 export class UserQueryRepository {
     static async getAllUsers(sortData: QueryUserInputModel): Promise<QueryUserOutputModel>{
@@ -78,22 +76,6 @@ export class UserQueryRepository {
         }
     }
 
-    static async getUserById(id:string): Promise<UserModel | null>{
-        const user = await userCollection.findOne({_id: new ObjectId(id)})
-        if(!user){
-            return null
-        }
-        return userMapper(user)
-    }
-
-    static async getUserWithPassword(loginOrEmail:string): Promise<WithId<UserDbType>| null>{
-        const user  = await userCollection.findOne({$or: [{login: loginOrEmail}, {email: loginOrEmail}]})
-        if(!user){
-            return null
-        }
-        return user
-    }
-
     static async getUserByLoginOrEmail(login: string, email: string): Promise<UserModel| null>{
         const user  = await userCollection.findOne({$or: [{login: login}, {email: email}]})
         if(!user){
@@ -102,33 +84,5 @@ export class UserQueryRepository {
         return userMapper(user)
     }
 
-    static async getUserByLogin(login: string): Promise<UserModel| null>{
-        const user  = await userCollection.findOne({login: login})
-        if(!user){
-            return null
-        }
-        return userMapper(user)
-    }
 
-    static async getUserByEmail(email: string): Promise<UserModel| null>{
-        const user  = await userCollection.findOne({email: email})
-        if(!user){
-            return null
-        }
-        return userMapper(user)
-    }
-
-    static async getConfirmationInfo(email: string):Promise<{confirmationCode: string, expirationDate: string, isConfirmed: boolean}|null>{
-        const info = await userCollection.findOne({email: email})
-        if(!info){
-            return null
-        }
-        return info.emailConfirmation
-    }
-
-    static async getUserByConfirmationCode(code:string):Promise<WithId<UserDbType>|null>{
-        const user = await userCollection.findOne({"emailConfirmation.confirmationCode": code})//{emailConfirmation: {confirmationCode: code}}
-        if(!user) return null
-        return user
-    }
 }

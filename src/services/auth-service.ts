@@ -1,6 +1,4 @@
-
 import {ErrorType, outputData} from "../types/common";
-import {UserQueryRepository} from "../query-repositories/user_query_repository";
 import {UserRepository} from "../repositories/user_db_repository";
 import {CreateUserModel} from "../types/users/input.users.model";
 import {emailManager} from "../managers/email-manager";
@@ -9,8 +7,54 @@ import {userMapper} from "../types/users/mappers/user-mapper";
 import {v4 as uuidv4} from "uuid";
 import {addHours} from "date-fns";
 import {ConfirmationInfoDBType} from "../types/db/db";
+import {tokensModel} from "../types/users/auth.login.models";
+import {jwtService} from "../applications/jwt-service";
+import {TokenRepository} from "../repositories/token_db_repository";
+import {REFRESH_SECRET} from "../settings";
 
 export const authService = {
+
+    async userLogin(loginOrEmail:string):Promise<tokensModel|null>{
+        const user = await UserRepository.getUserWithPassword(loginOrEmail)
+        if (!user){
+            return null
+        }
+
+        const tokens = await jwtService.createAccessAndRefreshTokens(user._id.toString())
+        return tokens
+    },
+
+    async userLogout(token: string):Promise<boolean>{
+        const userId = await jwtService.verifyTokenGetUserId(token, REFRESH_SECRET)
+
+        if (!userId){
+            return false
+        }
+
+        const isRevoked = await jwtService.revokeToken(token, userId, REFRESH_SECRET)
+        const isAddedToBlacklist = await TokenRepository.addTokenToBlacklist({refreshToken: token, userId})
+
+        if (isRevoked) return true
+        return false
+    },
+
+    async updateAccessAndRefreshTokens(token:string, secret: string):Promise<tokensModel|null>{
+        const userId = await jwtService.verifyTokenGetUserId(token, secret)
+
+        if (!userId){
+            return null
+        }
+
+        const isInBlacklist = await TokenRepository.getToken(token, userId)
+
+        if(isInBlacklist) return null
+
+        const isAddedToBlacklist = await TokenRepository.addTokenToBlacklist({refreshToken: token, userId})
+
+        const tokens = await jwtService.createAccessAndRefreshTokens(userId)
+        return tokens
+    },
+
     async userRegistration(user:CreateUserModel):Promise<outputData>{
         const admin  = false
         const newUser = await usersService.createUser(user, admin)
@@ -22,7 +66,7 @@ export const authService = {
             }
         }
 
-        const emailConfirmation = await UserQueryRepository.getConfirmationInfo(user.email)
+        const emailConfirmation = await UserRepository.getConfirmationInfo(user.email)
 
         if (!emailConfirmation){
             return {
@@ -57,13 +101,13 @@ export const authService = {
             errorsMessages: []
         }
 
-        const userByLogin = await UserQueryRepository.getUserByLogin(login)
+        const userByLogin = await UserRepository.getUserByLogin(login)
         if (userByLogin){
             errors.errorsMessages.push({message: 'User with this login already exists!', field: 'login'})
             return errors
         }
 
-        const userByEmail = await UserQueryRepository.getUserByEmail(email)
+        const userByEmail = await UserRepository.getUserByEmail(email)
         if (userByEmail){
             errors.errorsMessages.push({message: 'User with this email already exists!', field: 'email'})
             return errors
@@ -77,7 +121,7 @@ export const authService = {
             errorsMessages: []
         }
 
-        const user = await UserQueryRepository.getUserByConfirmationCode(code)
+        const user = await UserRepository.getUserByConfirmationCode(code)
 
         if(!user) {
             errors.errorsMessages.push({message: 'User is not found!', field: 'code'})
@@ -127,7 +171,7 @@ export const authService = {
             errorsMessages: []
         }
 
-        const user = await UserQueryRepository.getUserWithPassword(email)
+        const user = await UserRepository.getUserWithPassword(email)
 
         if(!user) {
             errors.errorsMessages.push({message: 'User is not found!', field: 'email'})
@@ -155,7 +199,7 @@ export const authService = {
             errorsMessages: []
         }
 
-        const user = await UserQueryRepository.getUserWithPassword(email)
+        const user = await UserRepository.getUserWithPassword(email)
 
         if(!user) {
             errors.errorsMessages.push({message: 'User is not found!', field: 'email'})

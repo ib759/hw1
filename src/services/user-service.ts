@@ -1,20 +1,17 @@
 import {UserRepository} from "../repositories/user_db_repository";
 import {CurrentUserOutput, UserModel} from "../types/users/output.users.model";
 import {outputData} from "../types/common";
-import {UserQueryRepository} from "../query-repositories/user_query_repository";
 import {CreateUserModel} from "../types/users/input.users.model";
 import {bcryptService} from "../applications/bcrypt-service";
 import {authService} from "./auth-service";
 import {UserDbType} from "../types/db/db";
 import {v4 as uuidv4} from "uuid";
-import add from "date-fns/fp";
-import {emailManager} from "../managers/email-manager";
 import {addHours} from "date-fns";
 
 export const usersService = {
 
     async checkCredentials(loginOrEmail:string, password:string): Promise<boolean>{
-        const user = await UserQueryRepository.getUserWithPassword(loginOrEmail)
+        const user = await UserRepository.getUserWithPassword(loginOrEmail)
 
         if (!user) {
             return false
@@ -61,7 +58,7 @@ export const usersService = {
             }
         }
 
-        const checkInsertion = await UserQueryRepository.getUserById(user.id)
+        const checkInsertion = await UserRepository.getUserById(user.id)
         if (!checkInsertion) {
             return {
                 status: 400,////swagger without 404
