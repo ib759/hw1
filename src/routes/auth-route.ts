@@ -109,6 +109,7 @@ authRoute.post('/registration-email-resending', emailResendingValidation(), asyn
 authRoute.post('/refresh-token', async(req: Request, res: Response) =>{
     if (!req.cookies['refreshToken']) {
            res.sendStatus(401)
+            return
     }
 
     const refreshToken = req.cookies['refreshToken']
@@ -126,6 +127,7 @@ authRoute.post('/refresh-token', async(req: Request, res: Response) =>{
 authRoute.post('/logout', async(req: Request, res: Response) =>{
     if (!req.cookies['refreshToken']) {
         res.sendStatus(401)
+        return
     }
 
     const refreshToken = req.cookies['refreshToken']
