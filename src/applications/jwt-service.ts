@@ -44,7 +44,7 @@ export const jwtService = {
 
     async revokeToken(token:string, id: string, secret: string):Promise<string|null>{
         try{
-            const token = jwt.sign({userId: id}, secret, {expiresIn:0})
+            //const token = jwt.sign({userId: id}, secret, {expiresIn:0})
             return  token
         }catch (e) {
             return null

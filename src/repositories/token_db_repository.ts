@@ -10,7 +10,9 @@ export class TokenRepository {
     }
 
     static async getToken(refreshToken: string, userId: string):Promise<WithId<tokenDBType>|null>{
-        const token = await tokenCollection.findOne({$and: [{refreshToken: refreshToken},{userid: userId}]})
+        //const token = await tokenCollection.findOne({$and: [{refreshToken: refreshToken},{userid: userId}]})
+        const token = await tokenCollection.findOne({refreshToken: refreshToken})
+        debugger
         if (!token) return null
         return token
     }
