@@ -29,15 +29,11 @@ export const authService = {
         if (!userId){
             return null
         }
+        const isInBlacklist = await TokenRepository.getToken(token, userId)
 
-        //const isRevokedToken = await jwtService.revokeToken(token, userId, REFRESH_SECRET)
-
-
-        //if (isRevokedToken ){
-        const isAddedToBlacklist = await TokenRepository.addTokenToBlacklist({refreshToken: token, userId})
+        if(isInBlacklist) return null
+        await TokenRepository.addTokenToBlacklist({refreshToken: token, userId})
         return token
-        //}
-        //return null
     },
 
     async updateAccessAndRefreshTokens(token:string, secret: string):Promise<tokensModel|null>{
@@ -48,7 +44,7 @@ export const authService = {
         }
 
         const isInBlacklist = await TokenRepository.getToken(token, userId)
-debugger
+
         if(isInBlacklist) return null
 
         const isAddedToBlacklist = await TokenRepository.addTokenToBlacklist({refreshToken: token, userId})

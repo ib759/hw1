@@ -132,10 +132,10 @@ authRoute.post('/logout', async(req: Request, res: Response) =>{
 
     const refreshToken = req.cookies['refreshToken']
 
-    const isRevoked = await authService.userLogout(refreshToken)
-
-    if(isRevoked){
-        res.cookie('refreshToken', isRevoked, { httpOnly: true, secure: true })
+    const isLogout = await authService.userLogout(refreshToken)
+debugger
+    if(isLogout){
+        res.cookie('refreshToken', isLogout, { httpOnly: true, secure: true })
         res.sendStatus(204)
         return
     }
