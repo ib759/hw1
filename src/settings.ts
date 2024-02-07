@@ -21,8 +21,8 @@ app.use('/comments',commentRoute)
 
 export const JWT_SECRET = process.env.JWT_SECRET || "123"
 export const REFRESH_SECRET = "123"
-export const ACCESS_LIFETIME = '1h'
-export const REFRESH_LIFETIME = '2h'
+export const ACCESS_LIFETIME = '10s'
+export const REFRESH_LIFETIME = '20s'
 
 
 
