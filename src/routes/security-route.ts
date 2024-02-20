@@ -4,6 +4,7 @@ import {securityService} from "../services/security-service";
 import {REFRESH_SECRET} from "../settings";
 import {jwtService} from "../applications/jwt-service";
 import {SecurityQueryRepository} from "../query-repositories/security_query_repository";
+import {ObjectId} from "mongodb";
 
 export const securityRoute = Router({})
 
@@ -61,6 +62,11 @@ securityRoute.delete('/devices/:deviceId', async (req: RequestWithParams<{device
 
     const refreshToken = req.cookies['refreshToken']
     const deviceId = req.params.deviceId
+
+    if (!ObjectId.isValid(deviceId)){
+        res.sendStatus(404)
+        return
+    }
 
     const isTerminated = await securityService.terminateSession(refreshToken, deviceId)
 

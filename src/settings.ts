@@ -26,6 +26,8 @@ export const JWT_SECRET = process.env.JWT_SECRET || "123"
 export const REFRESH_SECRET = "123"
 export const ACCESS_LIFETIME = '10s'
 export const REFRESH_LIFETIME = '20s'
+export const periodOfTime = -10
+export const maxNumberOfAttempts = 5
 
 
 
