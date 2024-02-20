@@ -26,8 +26,8 @@ export const authMiddleware = (req: Request<any, any, any, any>, res: Response, 
 
     const [login, password] = decodedData.split(":")
     //if(login !== 'admin' || password !== 'qwerty'){
-    if(login !== process.env["AUTH_LOGIN"] || password !== process.env["AUTH_PASSWORD"]){
 
+    if(login !== process.env["AUTH_LOGIN"] || password !== process.env["AUTH_PASSWORD"]){
         res.sendStatus(401)
         return
     }

@@ -105,9 +105,9 @@ export class BlogRepository {
                 blogName: blog.name,
                 createdAt: createdAt.toISOString()
             }
-            const res = await postCollection.insertOne(post)
+            const isInserted = await postCollection.insertOne(post)
 
-            return res.insertedId.toString()
+            return isInserted.insertedId.toString()
         }
         return null
     }

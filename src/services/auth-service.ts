@@ -11,45 +11,60 @@ import {tokensModel} from "../types/users/auth.login.models";
 import {jwtService} from "../applications/jwt-service";
 import {TokenRepository} from "../repositories/token_db_repository";
 import {REFRESH_SECRET} from "../settings";
+import {securityService} from "./security-service";
+import {SecurityRepository} from "../repositories/security_db_repository";
 
 export const authService = {
 
-    async userLogin(loginOrEmail:string):Promise<tokensModel|null>{
+    async userLogin(loginOrEmail:string, ipUser: string, title: string):Promise<tokensModel|null>{
         const user = await UserRepository.getUserWithPassword(loginOrEmail)
         if (!user){
             return null
         }
 
-        const tokens = await jwtService.createAccessAndRefreshTokens(user._id.toString())
+        const deviceId = uuidv4()
+        const tokens = await jwtService.createAccessAndRefreshTokens(user._id.toString(), deviceId)
+
+        if (!tokens) return null
+
+        const decodedToken = await jwtService.decodeRefreshToken(tokens.refreshToken)
+
+        if (decodedToken){
+
+            const added = await securityService.addSessionToTheList(decodedToken, ipUser, title)
+        }
+
         return tokens
     },
 
-    async userLogout(token: string):Promise<string|null>{
-        const userId = await jwtService.verifyTokenGetUserId(token, REFRESH_SECRET)
-        if (!userId){
+    async userLogout(token: string):Promise<boolean|null>{
+        const payloadRefreshToken = await jwtService.verifyRefreshToken(token, REFRESH_SECRET)
+        if (!payloadRefreshToken){
             return null
         }
-        const isInBlacklist = await TokenRepository.getToken(token, userId)
+        const isInBlacklist = await TokenRepository.getToken(token, payloadRefreshToken.userId)
 
         if(isInBlacklist) return null
-        await TokenRepository.addTokenToBlacklist({refreshToken: token, userId})
-        return token
+        await TokenRepository.addTokenToBlacklist({refreshToken: token, userId: payloadRefreshToken.userId})
+
+        const isDeleted = await SecurityRepository.deleteCurrentSessionForLogout(payloadRefreshToken.deviceId, payloadRefreshToken.userId)
+        return isDeleted
     },
 
-    async updateAccessAndRefreshTokens(token:string, secret: string):Promise<tokensModel|null>{
-        const userId = await jwtService.verifyTokenGetUserId(token, secret)
-
-        if (!userId){
+    async updateAccessAndRefreshTokens(token:string):Promise<tokensModel|null>{
+        //const userId = await jwtService.verifyTokenGetUserId(token, secret)
+        const payloadRefreshToken = await jwtService.verifyRefreshToken(token, REFRESH_SECRET)
+        if (!payloadRefreshToken){
             return null
         }
 
-        const isInBlacklist = await TokenRepository.getToken(token, userId)
+        const isInBlacklist = await TokenRepository.getToken(token, payloadRefreshToken.userId)
 
         if(isInBlacklist) return null
 
-        const isAddedToBlacklist = await TokenRepository.addTokenToBlacklist({refreshToken: token, userId})
+        await TokenRepository.addTokenToBlacklist({refreshToken: token, userId: payloadRefreshToken.userId})
 
-        const tokens = await jwtService.createAccessAndRefreshTokens(userId)
+        const tokens = await jwtService.createAccessAndRefreshTokens(payloadRefreshToken.userId, payloadRefreshToken.deviceId)
         return tokens
     },
 

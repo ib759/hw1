@@ -8,7 +8,9 @@ export type DBType = {
     posts: PostModel[],
     users: UserModel[],
     comments: CommentModel[],
-    tokens: tokenDBType[]
+    tokens: tokenDBType[],
+    sessions: devicesDBType[],
+    attempts: attemptsDBType[]
 }
 
 export type BlogDbType = {
@@ -59,4 +61,20 @@ export type CommentDbType = {
 export type tokenDBType = {
     refreshToken: string
     userId: string
+}
+
+export type devicesDBType = {
+    ip: string
+    title: string
+    lastActiveDate: string
+    deviceId: string
+    userId: string
+    issuedDate: number
+    expiredDate: number
+}
+
+export type attemptsDBType = {
+    IP: string
+    URL: string
+    date: Date
 }

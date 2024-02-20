@@ -22,6 +22,20 @@ export type outputData = {
     data: UserModel|ErrorType|string|object
 }
 
+export enum ResultCode{
+    NotVerified = 0,
+    Verified = 1,
+    Checked = 2,
+    NotChecked = 3,
+    isDeleted = 4
+}
+
+export type ResultObject<T> = {
+    resultCode: ResultCode,
+    data: T,
+    errorMessage?: string
+}
+
 
 
 

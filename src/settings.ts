@@ -6,11 +6,13 @@ import {testingRoute} from "./routes/testing-route";
 import {authRoute} from "./routes/auth-route";
 import {userRoute} from "./routes/user-route";
 import {commentRoute} from "./routes/comment-route";
+import {securityRoute} from "./routes/security-route";
 
 export const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
+app.set('trust proxy', true)
 
 app.use('/blogs', blogRoute)
 app.use('/posts', postRoute)
@@ -18,6 +20,7 @@ app.use('/testing',testingRoute)
 app.use('/users',userRoute)
 app.use('/auth',authRoute)
 app.use('/comments',commentRoute)
+app.use('/security',securityRoute)
 
 export const JWT_SECRET = process.env.JWT_SECRET || "123"
 export const REFRESH_SECRET = "123"

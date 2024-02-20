@@ -13,18 +13,21 @@ import {userValidation} from "../validators/user-validator";
 import {EmailResendingModel, InputConfirmationModel} from "../types/users/email.confirmation.models";
 import {authService} from "../services/auth-service";
 import {emailManager} from "../managers/email-manager";
-import {REFRESH_SECRET} from "../settings";
+import {v4 as uuidv4} from "uuid";
+import {attemptsLimit} from "../middlewares/attemptsLimit";
 
 
 export const authRoute = Router({})
 
-authRoute.post('/login', userInfoForLoginValidation(), async (req: RequestWithBody<authLoginModels>, res: Response) => {
+authRoute.post('/login', attemptsLimit, userInfoForLoginValidation(), async (req: RequestWithBody<authLoginModels>, res: Response) => {
     let {loginOrEmail, password} = req.body
+    const ipUser = req.ip!
+    const title = req.headers['user-agent'] || uuidv4()
 
     const valid= await usersService.checkCredentials(loginOrEmail, password)//false if login or email or password wrong or user not exists
 
     if(valid){
-        const tokens = await authService.userLogin(loginOrEmail)
+        const tokens = await authService.userLogin(loginOrEmail, ipUser, title)
         if(tokens){
             res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, secure: true })
             res.status(200).send(tokens.accessToken)
@@ -48,7 +51,7 @@ authRoute.get('/me', authBearerMiddleware, async(req:Request, res:Response) =>{
 
 })
 
-authRoute.post('/registration', userValidation(), async (req: RequestWithBody<CreateUserModel>, res: Response) =>{
+authRoute.post('/registration', attemptsLimit, userValidation(), async (req: RequestWithBody<CreateUserModel>, res: Response) =>{
 
     let {login, password, email} = req.body
 
@@ -67,7 +70,7 @@ authRoute.post('/registration', userValidation(), async (req: RequestWithBody<Cr
     }
 })
 
-authRoute.post('/registration-confirmation', confirmationCodeValidation(), async (req: RequestWithBody<InputConfirmationModel>, res: Response) =>{
+authRoute.post('/registration-confirmation', attemptsLimit, confirmationCodeValidation(), async (req: RequestWithBody<InputConfirmationModel>, res: Response) =>{
 
     const confirmationInfo = req.body
 
@@ -86,7 +89,7 @@ authRoute.post('/registration-confirmation', confirmationCodeValidation(), async
     }
 })
 
-authRoute.post('/registration-email-resending', emailResendingValidation(), async (req: RequestWithBody<EmailResendingModel>, res: Response) =>{
+authRoute.post('/registration-email-resending',attemptsLimit, emailResendingValidation(), async (req: RequestWithBody<EmailResendingModel>, res: Response) =>{
 
     const resendingInfo = req.body
 
@@ -113,7 +116,7 @@ authRoute.post('/refresh-token', async(req: Request, res: Response) =>{
     }
 
     const refreshToken = req.cookies['refreshToken']
-    const tokens  = await authService.updateAccessAndRefreshTokens(refreshToken, REFRESH_SECRET)
+    const tokens  = await authService.updateAccessAndRefreshTokens(refreshToken)
 
     if(tokens){
         res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, secure: true })
@@ -133,9 +136,9 @@ authRoute.post('/logout', async(req: Request, res: Response) =>{
     const refreshToken = req.cookies['refreshToken']
 
     const isLogout = await authService.userLogout(refreshToken)
-debugger
+
     if(isLogout){
-        res.cookie('refreshToken', isLogout, { httpOnly: true, secure: true })
+        //res.cookie('refreshToken', isLogout, { httpOnly: true, secure: true })
         res.sendStatus(204)
         return
     }
