@@ -15,7 +15,8 @@ export const jwtService = {
 
     async createAccessToken (id: string, secret: string, lifetime: string): Promise<string|null>{
         try{
-            const token = jwt.sign({userId: id}, secret, {expiresIn:lifetime})
+            const tokenId = crypto.randomUUID()
+            const token = jwt.sign({userId: id, tokenId: tokenId}, secret, {expiresIn:lifetime})
             return  token
         }catch (e) {
             return null
@@ -24,7 +25,8 @@ export const jwtService = {
 
     async createRefreshToken (id: string, deviceId:string, secret: string, lifetime: string): Promise<string|null>{
         try{
-            const token = jwt.sign({userId: id, deviceId: deviceId}, secret, {expiresIn:lifetime})
+            const tokenId = crypto.randomUUID()
+            const token = jwt.sign({userId: id, deviceId: deviceId, tokenId: tokenId}, secret, {expiresIn:lifetime})
             return  token
         }catch (e) {
             return null

@@ -1,5 +1,5 @@
 import {devicesDBType} from "../types/db/db";
-import {sessionCollection} from "../../db/db";
+import {sessionCollection, SessionModelMongoose} from "../../db/db";
 import {ObjectId, WithId} from "mongodb";
 import {refreshPayloadType} from "../types/tokens/token.models";
 
@@ -7,8 +7,8 @@ export class SecurityRepository {
 
     static async addSession(sessionDB: devicesDBType):Promise<string|null>{
         try{
-            const session = await sessionCollection.insertOne(sessionDB)
-            return session.insertedId.toString()
+            const session = await SessionModelMongoose.insertMany([sessionDB])
+            return session[0]._id.toString()
         }catch (e) {
             return null
         }
@@ -16,11 +16,11 @@ export class SecurityRepository {
 
     static async updateSessionWithNewRefreshToken(decoded: refreshPayloadType):Promise<boolean>{
         try{
-            const isUpdated = await sessionCollection
+            const isUpdated = await SessionModelMongoose
                 .updateOne({$and:[{userId: decoded.userId}, {deviceId: decoded.deviceId}]},
                     {$set: {'issuedDate': decoded.issuedAt,
                                     'expiredDate': decoded.expiresAt,
-                                    'lastActiveDate': decoded.issuedAt.toString()
+                                    'lastActiveDate': new Date(decoded.issuedAt*1000).toISOString()
                                     }})
             return !!isUpdated.matchedCount
         }catch (e) {
@@ -29,24 +29,31 @@ export class SecurityRepository {
     }
 
     static async deleteSession(sessionId: string): Promise<boolean>{
-        const deleted = await sessionCollection.deleteOne({_id: new ObjectId(sessionId)})
+        const deleted = await SessionModelMongoose
+            .deleteOne({_id: new ObjectId(sessionId)})
         return !!deleted.deletedCount
     }
 
     static async deleteSessionsWithoutCurrent(deviceId: string, userId: string): Promise<boolean>{
-        const deleted = await sessionCollection.deleteMany({$or:[{deviceId: {$ne: deviceId}},{userId: {$ne:userId}}]})
+        const deleted = await SessionModelMongoose
+            .deleteMany({$or:[{deviceId: {$ne: deviceId}},{userId: {$ne:userId}}]})
         return !!deleted.deletedCount
-
     }
 
     static async deleteCurrentSessionForLogout(deviceId: string, userId: string): Promise<boolean>{
-        const deleted = await sessionCollection.deleteOne({$and:[{deviceId: deviceId},{userId: userId}]})
+        const deleted = await SessionModelMongoose
+            .deleteOne({$and:[{deviceId: deviceId},{userId: userId}]})
         return !!deleted.deletedCount
     }
 
     static async getSessionByDevicesId(deviceId: string): Promise<WithId<devicesDBType>|null>{
+        return await SessionModelMongoose
+            .findOne({deviceId: deviceId})
+    }
 
-        return await sessionCollection.findOne({deviceId: deviceId})
+    static async getSessionsByDeviceIdAndUserId(deviceId: string, userId: string): Promise<WithId<devicesDBType>|null>{
+        return await SessionModelMongoose
+            .findOne({$and:[{deviceId: deviceId},{userId: userId}]})
     }
 
 }

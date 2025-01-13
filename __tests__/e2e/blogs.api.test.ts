@@ -1,4 +1,5 @@
-import request from 'supertest'
+import * as request from 'supertest'
+//import request from 'supertest'
 import {app} from "../../src/settings";
 
 export let createdBlogForPost: any = null

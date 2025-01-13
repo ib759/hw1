@@ -11,3 +11,8 @@ export type tokensModel = {
     accessToken: accessTokenModel
     refreshToken: string
 }
+
+export type newPasswordModel = {
+    newPassword: string
+    recoveryCode: string
+}

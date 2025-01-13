@@ -1,16 +1,16 @@
 import {Router, Request, Response} from "express";
 import {RequestWithBody} from "../types/common";
-import {authLoginModels} from "../types/users/auth.login.models";
+import {authLoginModels, newPasswordModel} from "../types/users/auth.login.models";
 import {
     confirmationCodeValidation,
-    emailResendingValidation,
+    emailResendingValidation, newPasswordValidation,
     userInfoForLoginValidation
 } from "../validators/auth-user-validator";
 import {usersService} from "../services/user-service";
 import {authBearerMiddleware} from "../middlewares/authorization/authBearerMiddleware";
 import {CreateUserModel} from "../types/users/input.users.model";
 import {userValidation} from "../validators/user-validator";
-import {EmailResendingModel, InputConfirmationModel} from "../types/users/email.confirmation.models";
+import {EmailSendingModel, InputConfirmationModel} from "../types/users/email.confirmation.models";
 import {authService} from "../services/auth-service";
 import {emailManager} from "../managers/email-manager";
 import {v4 as uuidv4} from "uuid";
@@ -89,7 +89,7 @@ authRoute.post('/registration-confirmation', attemptsLimit, confirmationCodeVali
     }
 })
 
-authRoute.post('/registration-email-resending',attemptsLimit, emailResendingValidation(), async (req: RequestWithBody<EmailResendingModel>, res: Response) =>{
+authRoute.post('/registration-email-resending', attemptsLimit, emailResendingValidation(), async (req: RequestWithBody<EmailSendingModel>, res: Response) =>{
 
     const resendingInfo = req.body
 
@@ -109,16 +109,57 @@ authRoute.post('/registration-email-resending',attemptsLimit, emailResendingVali
 
 })
 
+authRoute.post('/password-recovery', attemptsLimit, emailResendingValidation(), async (req: RequestWithBody<EmailSendingModel>, res: Response) =>{
+    const sendingInfo = req.body
+    //const code =  uuidv4()
+
+    const isCodeResent = await emailManager.sendRecoveryPasswordCode(sendingInfo.email)
+
+    switch(isCodeResent.status){
+        case 400:
+            res.status(400).send(isCodeResent.data)
+            break;
+        case 204:
+            res.sendStatus(204)
+            break;
+        default:
+            res.sendStatus(400)
+            break;
+    }
+
+})
+
+authRoute.post('new-password', attemptsLimit, newPasswordValidation(), async(req: RequestWithBody<newPasswordModel>, res: Response)=>{
+    const passwordInfo = req.body
+
+    const isUpdatedPassword = await authService.newPassword(passwordInfo.newPassword, passwordInfo.recoveryCode)
+
+    switch(isUpdatedPassword.status){
+        case 1:
+            res.status(400).send(isUpdatedPassword.data)
+            break;
+        case 2:
+            res.sendStatus(204)
+            break;
+        default:
+            res.sendStatus(400)
+            break;
+    }
+
+})
 authRoute.post('/refresh-token', async(req: Request, res: Response) =>{
+
     if (!req.cookies['refreshToken']) {
            res.sendStatus(401)
             return
     }
 
     const refreshToken = req.cookies['refreshToken']
+
     const tokens  = await authService.updateAccessAndRefreshTokens(refreshToken)
 
     if(tokens){
+
         res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, secure: true })
         res.status(200).send(tokens.accessToken)
         return
@@ -138,7 +179,6 @@ authRoute.post('/logout', async(req: Request, res: Response) =>{
     const isLogout = await authService.userLogout(refreshToken)
 
     if(isLogout){
-        //res.cookie('refreshToken', isLogout, { httpOnly: true, secure: true })
         res.sendStatus(204)
         return
     }

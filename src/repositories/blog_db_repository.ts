@@ -1,4 +1,4 @@
-import {blogCollection, postCollection} from "../../db/db";
+import {blogCollection, BlogModelMongoose, postCollection, PostModelMongoose} from "../../db/db";
 import {BlogModel} from "../types/blogs/output";
 import {blogMapper} from "../types/blogs/mappers/blog-mapper";
 import {ObjectId, WithId} from "mongodb";
@@ -24,16 +24,26 @@ export class BlogRepository {
             }
         }
 
-        const blogs = await blogCollection
+        /*const blogs = await blogCollection
             .find(filter)
             .sort(sortBy, sortDirection)
             .skip((pageNumber-1)*pageSize)
             .limit(+pageSize)
-            .toArray()
+            .toArray()*/
 
-        const blogsEdit = blogs.map(blogMapper)
-        const totalCount = await blogCollection.countDocuments(filter)
+        const blogsM = await BlogModelMongoose
+            .find(filter)
+            .sort({sortBy: sortDirection})
+            .skip((pageNumber-1)*pageSize)
+            .limit(+pageSize)
+            .lean()
+//debugger
+        //const blogsEdit = blogs.map(blogMapper)
+        const blogsEdit = blogsM.map(blogMapper)
+        //const totalCount = await blogCollection.countDocuments(filter)
+        const totalCount = await BlogModelMongoose.countDocuments(filter)
         const pagesCount = Math.ceil(totalCount/pageSize)
+
         return {
             pagesCount,
             page: +pageNumber,
@@ -50,14 +60,14 @@ export class BlogRepository {
         const pageNumber = sortData.pageNumber ?? 1
         const pageSize = sortData.pageSize ?? 10
 
-        const posts = await postCollection
+        const posts = await PostModelMongoose
             .find({blogId: blogId})
-            .sort(sortBy, sortDirection)
+            .sort({sortBy: sortDirection})
             .skip((pageNumber-1)*pageSize)
             .limit(+pageSize)
-            .toArray()
+            .lean()
 
-        const totalCount = await postCollection.countDocuments({blogId: blogId})
+        const totalCount = await PostModelMongoose.countDocuments({blogId: blogId})
         const pagesCount = Math.ceil(totalCount/pageSize)
         return {
             pagesCount,
@@ -70,7 +80,8 @@ export class BlogRepository {
     }
 
     static async getBlogById(id:string): Promise<BlogModel | null>{
-        const blog = await blogCollection.findOne({_id: new ObjectId(id)})
+        //const blog = await blogCollection.findOne({_id: new ObjectId(id)})
+        const blog = await BlogModelMongoose.findOne({_id: new ObjectId(id)})
         if(!blog){
             return null
         }
@@ -84,11 +95,15 @@ export class BlogRepository {
             createdAt: createdAt.toISOString(),
             isMembership: false
         }
-        const blog = await blogCollection.insertOne(newBlog)
+        //const blog = await blogCollection.insertOne(newBlog)
+        const blog = await BlogModelMongoose.insertMany([newBlog])
+
+        //const blogidtest = blog[0]._id.toString()
 
         return {
             ...newBlog,
-            id: blog.insertedId.toString()
+            //id: blog.insertedId.toString()
+            id: blog[0]._id.toString()
         }
     }
 
@@ -105,25 +120,34 @@ export class BlogRepository {
                 blogName: blog.name,
                 createdAt: createdAt.toISOString()
             }
-            const isInserted = await postCollection.insertOne(post)
+            //const isInserted = await postCollection.insertOne(post)
+            const isInserted = await PostModelMongoose.insertMany([post])
 
-            return isInserted.insertedId.toString()
+            return isInserted[0]._id.toString()
         }
         return null
     }
 
     static async updateBlogById(id:string, updatedData: UpdateBlogModel): Promise<boolean> {
 
-        const blog = await blogCollection.updateOne({_id: new ObjectId(id)}, {$set: {
+        /*const blog = await blogCollection.updateOne({_id: new ObjectId(id)}, {$set: {
             name: updatedData.name,
             description: updatedData.description,
                 websiteUrl: updatedData.websiteUrl
-        }})
-        return !!blog.matchedCount;
+        }})*/
+        const blog = await BlogModelMongoose.updateOne({_id: new ObjectId(id)}, {$set: {
+                name: updatedData.name,
+                description: updatedData.description,
+                websiteUrl: updatedData.websiteUrl
+            }})
+        //return !!blog.matchedCount;
+
+        return !!blog.modifiedCount;
     }
 
     static async deleteBlogById(id:string): Promise<boolean> {
-        const blog = await blogCollection.deleteOne({_id: new ObjectId(id)})
+        //const blog = await blogCollection.deleteOne({_id: new ObjectId(id)})
+        const blog = await BlogModelMongoose.deleteOne({_id: new ObjectId(id)})
         return !!blog.deletedCount;
     }
 }

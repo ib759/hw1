@@ -27,13 +27,15 @@ export enum ResultCode{
     Verified = 1,
     Checked = 2,
     NotChecked = 3,
-    isDeleted = 4
+    isDeleted = 4,
+    NotFound =5
 }
 
 export type ResultObject<T> = {
     resultCode: ResultCode,
     data: T,
-    errorMessage?: string
+    errorMessage?: string,
+    payload?: string
 }
 
 

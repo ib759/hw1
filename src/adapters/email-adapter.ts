@@ -2,14 +2,14 @@ import nodemailer from "nodemailer";
 import {outputData} from "../types/common";
 
 export const emailAdapter ={
-    async sendEmail(email: string, code: string):Promise<outputData>{
+    async sendEmail(email: string, code: string, html: string, subject: string):Promise<outputData>{
         const from = '"Registration" <ib759759759@gmail.com>'
-        const subject = "Registration confirmation"
+        //const subject = "Registration confirmation"
         const text = "Registration"
-        const html = `<h1>Thank for your registration</h1>
+        /*const html = `<h1>Thank for your registration</h1>
                         <p>To finish registration please follow the link below:
                             <a href='https://somesite.com/confirm-email?code=${code}'>complete registration</a>
-                        </p>`
+                        </p>`*/
 
         let transporter = await nodemailer.createTransport({
             host: 'smtp.gmail.com',

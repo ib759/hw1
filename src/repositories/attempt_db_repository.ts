@@ -1,24 +1,22 @@
-import {attemptCollection} from "../../db/db";
-import {addHours, addSeconds} from "date-fns";
-import {attemptsDBType} from "../types/db/db";
+import {attemptCollection, AttemptModelMongoose} from "../../db/db";
+import {subSeconds} from "date-fns";
 
 export class AttemptRepository {
-   static async getAllDocumentsForPeriodOfTime(ipUser: string,period: number):Promise<number|null>{
+   static async getAllDocumentsForPeriodOfTime(ipUser: string, URL: string, period: number):Promise<number|null>{
        try{
-           const attempts = await attemptCollection
-               .find({$and:[{IP: ipUser},{date: {$gte: addSeconds(new Date(), period)}}]})
-               .toArray()
-           return attempts.length
+           const attempts = await AttemptModelMongoose
+               .countDocuments({$and:[{IP: ipUser},{URL: URL},{date: {$gte: subSeconds(new Date(), period)}}]})
+           return attempts
        } catch (e:any) {
            return null
        }
    }
 
-   static async addNewAttempt(newAttempt: attemptsDBType): Promise<string|null>{
+   static async addNewAttempt(IP: string, URL: string): Promise<string|null>{
        try{
-           const isInserted = await attemptCollection.insertOne(newAttempt)
-           return isInserted.insertedId.toString()
-       } catch (e) {
+           const isInserted = await AttemptModelMongoose.insertMany([{IP, URL, date: new Date()}])
+           return isInserted[0]._id.toString()
+       } catch (e: any) {
            return null
        }
 

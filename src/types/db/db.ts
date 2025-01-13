@@ -37,10 +37,10 @@ export type ConfirmationInfoDBType = {
 }
 
 export type UserDbType = {
-    login: string,
-    password: string,
-    email: string,
-    createdAt: string
+    login: string
+    password: string
+    email: string
+    createdAt: string,
     emailConfirmation: {
                 confirmationCode: string
                 expirationDate: string
@@ -49,12 +49,12 @@ export type UserDbType = {
 }
 
 export type CommentDbType = {
-    content: string,
+    content: string
     commentatorInfo: {
-        userId: string,
+        userId: string
         userLogin: string
     },
-    createdAt: string,
+    createdAt: string
     postId: string // dont mentioned in Swagger
 }
 

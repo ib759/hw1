@@ -63,10 +63,14 @@ securityRoute.delete('/devices/:deviceId', async (req: RequestWithParams<{device
     const refreshToken = req.cookies['refreshToken']
     const deviceId = req.params.deviceId
 
-    if (!ObjectId.isValid(deviceId)){
+    /*if (!ObjectId.isValid(deviceId)){
         res.sendStatus(404)
         return
-    }
+    }*/
+    /*if(!deviceId) {
+        res.sendStatus(404)
+        return
+    }*/
 
     const isTerminated = await securityService.terminateSession(refreshToken, deviceId)
 
@@ -82,7 +86,7 @@ securityRoute.delete('/devices/:deviceId', async (req: RequestWithParams<{device
             res.sendStatus(403)
             break
         case ResultCode.Verified:
-            if (isTerminated.data === false) {
+            if (!isTerminated.data) {
                 res.sendStatus(401)
                 return
             }

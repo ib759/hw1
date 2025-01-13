@@ -21,12 +21,12 @@ export const authService = {
         if (!user){
             return null
         }
-
+        //console.log('User:   ' +user)
         const deviceId = uuidv4()
         const tokens = await jwtService.createAccessAndRefreshTokens(user._id.toString(), deviceId)
 
         if (!tokens) return null
-
+        //console.log('Tokens:   ' +tokens)
         const decodedToken = await jwtService.decodeRefreshToken(tokens.refreshToken)
 
         if (decodedToken){
@@ -59,12 +59,15 @@ export const authService = {
         }
 
         const isInBlacklist = await TokenRepository.getToken(token, payloadRefreshToken.userId)
-
         if(isInBlacklist) return null
 
         await TokenRepository.addTokenToBlacklist({refreshToken: token, userId: payloadRefreshToken.userId})
 
+        const isSessionActive = await SecurityRepository.getSessionsByDeviceIdAndUserId(payloadRefreshToken.deviceId, payloadRefreshToken.userId)
+        if (!isSessionActive) return null
+
         const tokens = await jwtService.createAccessAndRefreshTokens(payloadRefreshToken.userId, payloadRefreshToken.deviceId)
+
         return tokens
     },
 
@@ -88,21 +91,16 @@ export const authService = {
             }
         }
 
-        let errors: ErrorType = {
-            errorsMessages: []
-        }
+         emailManager.sendConfirmationCode(user.email, emailConfirmation.confirmationCode)
 
-          const result = await emailManager.sendConfirmationCode(user.email, emailConfirmation.confirmationCode)
-
-        if (result.status === 400){
+        /*if (result.status === 400){
             errors.errorsMessages.push({message: result.data.toString(), field: 'email'})
             await UserRepository.deleteUserByEmail(user.email)
             return {
                 status: 400,
                 data: errors
             }
-        }
-
+        }*/
         return {
             status: 204,
             data: ' '
@@ -129,6 +127,50 @@ export const authService = {
         return null
     },
 
+    async newPassword(password: string, code: string):Promise<outputData>{
+        let errors: ErrorType = {
+            errorsMessages: []
+        }
+
+        const user = await UserRepository.getUserByConfirmationCode(code)
+
+        if(!user) {
+            errors.errorsMessages.push({message: 'User is not found!', field: 'code'})
+            return {
+                status:1,
+                data:errors
+            }}
+        if(user.emailConfirmation.confirmationCode != code) {
+            errors.errorsMessages.push({message: 'ConfirmationCode is incorrect!', field: 'code'})
+            return {
+                status:1,
+                data:errors
+            }}
+
+        if(user.emailConfirmation.expirationDate < new Date().toISOString()) {
+            errors.errorsMessages.push({message: 'Confirmation code is expired!', field: 'code'})
+            return {
+                status:1,
+                data:errors
+            }}
+
+        try{
+            await UserRepository.updatePassword(user._id.toString(), password)
+        }
+        catch (error: any) {
+            errors.errorsMessages.push({message: error, field: 'code'})
+            return{
+                status:1,
+                data:errors
+            }
+        }
+
+        return {
+            status:2,
+            data:' '
+        }
+    },
+
     async confirmEmail(code: string):Promise<outputData>{
         let errors: ErrorType = {
             errorsMessages: []
@@ -149,7 +191,7 @@ export const authService = {
                 data:errors
             }}
 
-        if(user.emailConfirmation.confirmationCode !== code) {
+        if(user.emailConfirmation.confirmationCode != code) {
             errors.errorsMessages.push({message: 'ConfirmationCode is incorrect!', field: 'code'})
             return {
                 status:1,

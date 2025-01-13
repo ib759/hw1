@@ -1,4 +1,5 @@
-import request from 'supertest'
+import * as request from 'supertest'
+//import request from 'supertest'
 import {app} from "../../src/settings";
 import {BlogRepository} from "../../src/repositories/blog_db_repository";
 import {postMapper} from "../../src/types/posts/mappers/post-mapper";

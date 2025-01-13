@@ -1,4 +1,11 @@
-import {blogCollection, commentCollection, postCollection} from "../../db/db";
+import {
+    blogCollection,
+    BlogModelMongoose,
+    commentCollection,
+    CommentModelMongoose,
+    postCollection,
+    PostModelMongoose
+} from "../../db/db";
 import {PostModel} from "../types/posts/output";
 import {postMapper} from "../types/posts/mappers/post-mapper";
 import {ObjectId} from "mongodb";
@@ -24,14 +31,15 @@ export class PostRepository {
         const pageNumber = sortData.pageNumber ?? 1
         const pageSize = sortData.pageSize ?? 10
 
-        const posts = await postCollection
+        const posts = await PostModelMongoose
             .find({})
-            .sort(sortBy, sortDirection)
+            .sort({sortBy: sortDirection})
             .skip((pageNumber-1)*pageSize)
             .limit(+pageSize)
-            .toArray()
+            .lean()
 
-        const totalCount = await postCollection.countDocuments()
+        //const totalCount = await postCollection.countDocuments()
+        const totalCount = await PostModelMongoose.countDocuments()
         const pagesCount = Math.ceil(totalCount/pageSize)
         return {
             pagesCount,
@@ -44,7 +52,8 @@ export class PostRepository {
     }
 
     static async getPostById(id:string): Promise<PostModel | null>{
-        const post = await postCollection.findOne({_id: new ObjectId(id)})
+        //const post = await postCollection.findOne({_id: new ObjectId(id)})
+        const post = await PostModelMongoose.findOne({_id: new ObjectId(id)})
         if(!post){
             return null
         }
@@ -54,7 +63,8 @@ export class PostRepository {
     static async createPost(createdPost: CreatePostModel): Promise<PostModel|undefined>{
         const createdAt = new Date()
 
-        const blog = await blogCollection.findOne({_id: new ObjectId(createdPost.blogId)})
+        //const blog = await blogCollection.findOne({_id: new ObjectId(createdPost.blogId)})
+        const blog = await BlogModelMongoose.findOne({_id: new ObjectId(createdPost.blogId)})
         if(!blog){
             return
         }
@@ -64,16 +74,16 @@ export class PostRepository {
             createdAt: createdAt.toISOString()
         }
 
-        const post = await postCollection.insertOne(newPost)
-
+        //const post = await postCollection.insertOne(newPost)
+        const post = await PostModelMongoose.insertMany([newPost])
         return {
             ...newPost,
-            id: post.insertedId.toString()
+            id: post[0]._id.toString()
         }
     }
 
     static async updatePostById(id:string, updatedPost: UpdatePostModel): Promise<boolean>{
-        const post = await postCollection.updateOne({_id: new ObjectId(id)}, {$set: {
+        const post = await PostModelMongoose.updateOne({_id: new ObjectId(id)}, {$set: {
                 title: updatedPost.title,
                 shortDescription: updatedPost.shortDescription,
                 content: updatedPost.content,
@@ -83,7 +93,7 @@ export class PostRepository {
     }
 
     static async deletePostById(id:string): Promise<boolean>{
-        const post = await postCollection.deleteOne({_id: new ObjectId(id)})
+        const post = await PostModelMongoose.deleteOne({_id: new ObjectId(id)})
         return !!post.deletedCount;
     }
 
@@ -101,11 +111,11 @@ export class PostRepository {
             postId: postId
         }
 
-        const comment = await commentCollection.insertOne(newComment)
+        const comment = await CommentModelMongoose.insertMany([newComment])
 
         return{
             ...newComment,
-            id: comment.insertedId.toString()
+            id: comment[0]._id.toString()
         }
     }
 
@@ -116,14 +126,14 @@ export class PostRepository {
         const sortBy = sortData.sortBy ?? 'createdAt'
         const sortDirection = sortData.sortDirection ?? 'desc'
 
-        const comments = await commentCollection
+        const comments = await CommentModelMongoose
             .find({postId: postId})
-            .sort(sortBy, sortDirection)
+            .sort({sortBy: sortDirection})
             .skip((pageNumber-1)*pageSize)
             .limit(+pageSize)
-            .toArray()
+            .lean()
 
-        const totalCount = await commentCollection.countDocuments({postId: postId})
+        const totalCount = await CommentModelMongoose.countDocuments({postId: postId})
         const pagesCount = Math.ceil(totalCount/pageSize)
 
         return{

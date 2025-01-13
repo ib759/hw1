@@ -3,7 +3,7 @@ export type InputConfirmationModel = {
     code:string
 }
 
-export type EmailResendingModel = {
+export type EmailSendingModel = {
     email: string
 }
 

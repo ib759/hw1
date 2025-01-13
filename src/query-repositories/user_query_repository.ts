@@ -1,6 +1,6 @@
 import {QueryUserInputModel} from "../types/users/query.user.input.model";
 import {QueryUserOutputModel} from "../types/users/query.user.output.model";
-import {userCollection} from "../../db/db";
+import {userCollection, UserModelMongoose} from "../../db/db";
 import {userMapper} from "../types/users/mappers/user-mapper";
 import {UserModel} from "../types/users/output.users.model";
 
@@ -51,12 +51,12 @@ export class UserQueryRepository {
                     }
         }*/
 
-        const users = await userCollection
+        const users = await UserModelMongoose
             .find(filter)
-            .sort(sortBy, sortDirection)
+            .sort({sortBy: sortDirection})
             .skip((pageNumber-1)*pageSize)
             .limit(+pageSize)
-            .toArray()
+            .lean()
 
         //const total = users.length
         let totalCount = await userCollection.countDocuments()
@@ -77,7 +77,7 @@ export class UserQueryRepository {
     }
 
     static async getUserByLoginOrEmail(login: string, email: string): Promise<UserModel| null>{
-        const user  = await userCollection.findOne({$or: [{login: login}, {email: email}]})
+        const user  = await UserModelMongoose.findOne({$or: [{login: login}, {email: email}]})
         if(!user){
             return null
         }

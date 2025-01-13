@@ -7,6 +7,7 @@ import {authRoute} from "./routes/auth-route";
 import {userRoute} from "./routes/user-route";
 import {commentRoute} from "./routes/comment-route";
 import {securityRoute} from "./routes/security-route";
+import {attemptsLimit} from "./middlewares/attemptsLimit";
 
 export const app = express()
 
@@ -18,19 +19,22 @@ app.use('/blogs', blogRoute)
 app.use('/posts', postRoute)
 app.use('/testing',testingRoute)
 app.use('/users',userRoute)
-app.use('/auth',authRoute)
+//app.use('/auth', attemptsLimit, authRoute)
+app.use('/auth', authRoute)
 app.use('/comments',commentRoute)
 app.use('/security',securityRoute)
+
+//app.all('/auth/\/reg|\/login', attemptsLimit)
+//app.all('/auth', attemptsLimit)
+//app.all(/\/reg|\/login/, attemptsLimit)
+//app.all(/\/login/, attemptsLimit)
 
 export const JWT_SECRET = process.env.JWT_SECRET || "123"
 export const REFRESH_SECRET = "123"
 export const ACCESS_LIFETIME = '10s'
 export const REFRESH_LIFETIME = '20s'
-export const periodOfTime = -10
+export const periodOfTime = 10
 export const maxNumberOfAttempts = 5
-
-
-
 
 
 
